@@ -1,9 +1,10 @@
 # 在 VS Code 中使用本项目
 
-本文件说明如何在新电脑上为 VS Code Copilot Chat 配置全局指令，使以下两个行为规则在**所有项目**中自动生效：
+本文件说明如何在新电脑上为 VS Code Copilot Chat 配置全局指令，使以下行为规则在**所有项目**中自动生效：
 
 - **karpathy-guidelines**：四条编码行为规则（编码前思考、简洁优先、精准修改、目标驱动）
 - **grill-me**：设计压力测试技能，提到"grill me / 考我 / 追问"时触发
+- **typescript-safety**：TypeScript 类型安全规则，禁止不必要的 `as any`
 
 ---
 
@@ -260,5 +261,77 @@ applyTo: "**"
 1. 优先用引擎术语回答，除非用户问"为什么"
 2. 诊断时先追问缩小范围，不要直接给方案
 3. 配合 CodeGraph 查引擎源码定位具体实现
+```
+
+---
+
+## 第四步：创建 `typescript-safety.instructions.md`
+
+在同一目录中新建文件 `typescript-safety.instructions.md`，内容如下：
+
+```markdown
+---
+applyTo: "**/*.{ts,tsx}"
+---
+
+# TypeScript 类型安全规则
+
+生成 TypeScript/TSX 代码时，必须遵循以下类型安全规则。
+
+**核心原则：能明确知道类型时，禁止使用 `as any`。**
+
+---
+
+## 为什么禁止 `as any`
+
+`as any` 会完全绕过 TypeScript 的类型系统，让编译器放弃对该表达式的所有类型检查。`any` 会穿透整个类型链——一个 `as any` 可能导致后续多处类型检查失效，将运行时错误隐藏到很远的地方才暴露。
+
+---
+
+## 禁止场景（必须用具体类型替代）
+
+| 场景 | 不要这样写 | 应该这样写 |
+|------|-----------|-----------|
+| API 响应 | `const data = response.data as any` | `const data = response.data as ApiResponse` 或定义接口 |
+| 函数返回值 | `function get(): any` | `function get(): User` 或其它具体类型 |
+| 对象属性 | `(obj as any).prop` | 定义正确类型或使用类型守卫 |
+| 数组元素 | `items.map(i => i as any)` | `items.map(i => i as KnownType)` |
+| 修复类型错误 | `// @ts-ignore` + `as any` | 修复实际类型问题，或使用类型守卫 |
+| 泛型 | `Map<string, any>` | `Map<string, User>` |
+
+---
+
+## 允许的例外场景（但必须按规则使用）
+
+只有在**确实无法确定类型**时才允许，且应优先使用 `as unknown as T` 而非直接 `as any`：
+
+1. **与无类型第三方库交互** — 库没有 .d.ts 类型定义
+2. **JSON.parse 后重构类型** — 用 `JSON.parse(str) as unknown as T`
+3. **渐进迁移遗留代码** — 必须加注释 `// TODO: 移除 as any，定义正确类型`
+
+**任何允许的 `as any` 都必须加注释说明理由。**
+
+---
+
+## 优先替代方案
+
+按优先级从高到低：
+
+1. **定义接口/类型** — 最推荐，类型完整保留
+2. **类型守卫** — `isX(value): value is X` 缩小类型范围
+3. **`as const`** — 固定字面量类型，而非 `as any`
+4. **`satisfies`** — 验证类型匹配但不改变推断结果
+5. **`as unknown as T`** — 逃生口，至少声明了目标类型
+6. **` as any`（最后选择）** — 仅在前 5 项都不适用时
+
+---
+
+## 检查原则
+
+收到用户代码时，注意识别 `as any` 的使用：
+
+- 如果是**新增代码**中出现了不必要的 `as any` → 建议用具体类型替代
+- 如果是**已有遗留代码**中的 `as any` → 除非在相关改动范围附近，否则不动
+- 如果是你生成的代码中出现了 `as any` → 先自问"这里我真的不知道类型吗？"再使用
 ```
 
