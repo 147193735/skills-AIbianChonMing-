@@ -90,6 +90,43 @@ applyTo: "**"
 | Texture Wrap | Wrap Mode | Texture Addressing | wrap_mode | Address (WRAP/MIRROR/CLAMP) | WrapMode (Repeat/Clamp/Mirrored) |
 | Depth Bias | Depth Bias | Shadow Bias | depth_bias | RasterizerState.depthBias | ShadowMap.bias |
 
+## 引擎架构概念（游戏开发必备）
+
+### 场景图与变换
+- **场景图**：树形结构组织物体，父子节点变换级联
+- Cocos: `Scene → Node → children[]`  |  Laya: `Scene → Sprite → _children`
+- 脏标记优化：只有变了才重算世界矩阵
+
+### 渲染管线架构
+- Cocos: **FrameGraph** 声明式 — `RenderGraph → ExecutorContext → SceneCulling`
+- Laya: **命令式** — `RenderContext3D → Laya3DRender → CommandBuffer`
+- 常见 Bug: Pass 不渲染 → FrameGraph 依赖链断了 / BaseRender 没注册
+
+### 剔除系统
+- 视锥剔除：包围盒在视锥外 → 不渲染
+- Cocos: `SceneCulling.frustumCulling()`  |  Laya: Camera 遍历时 AABB 检测
+- LOD: 远处用低模 → `LODGroup`(Cocos) / `HLOD`(Laya)
+
+### 合批与实例化
+- 静态合批：不动物体合并 Mesh
+- GPU Instancing：一个 Draw Call 画多个相同物体
+- Cocos: `RenderInstancedQueue`  |  Laya: `VertexBuffer.instanceBuffer`
+
+### 组件系统
+- Cocos: `Node.addComponent<T>()` → `onLoad → start → update`
+- Laya: `ComponentDriver` → `_addComponent → _init → _update`
+
+### 资源生命周期
+- 引用计数：`addRef/decRef` → 归零才释放
+- 常见 Bug: 切换场景纹理变黑 → 资源被提前释放
+
+### 引擎差异速查
+| 场景 | Cocos Creator 4.0 | LayaAir 3.3 |
+|------|-------------------|-------------|
+| 获取摄像机 | `director.root.cameraList[0]` | `Scene3D._camera` |
+| 创建材质 | `new Material()` + `initialize({effectAsset})` | `new Material()` + `setShaderName()` |
+| GPU Instancing | Material 勾选 `useInstancing` | `VertexBuffer.instanceBuffer = true` |
+
 ## 关键公式
 - MVP = P × V × M（右乘）→ gl_Position
 - N·L = cos(θ) → 漫反射强度

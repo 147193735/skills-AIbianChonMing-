@@ -175,7 +175,113 @@ codegraph explore "shadow bias depth offset unity"
 
 ---
 
-## 七、注意事项
+## 七、引擎架构概念（渲染管线之上的层）
+
+> 以下概念是纯 GPU 渲染之上的"引擎层"——OpenGL 不管这些，但每个游戏引擎必须实现。
+
+### 7.1 场景图与变换层级
+
+| 概念 | 一句话 | Cocos Creator 4.0 | LayaAir 3.3 |
+|------|--------|-------------------|-------------|
+| **场景图** | 树形结构组织所有物体，父节点变换影响子节点 | `Scene` → `Node` → `children: Node[]` | `Scene` → `Sprite` → `_children` |
+| **局部→世界变换** | 每个节点存 local 变换，递归乘父矩阵得世界变换 | `Node.worldMatrix`, `Node.position` | `Sprite.transform` → 递归计算 |
+| **脏标记** | 只有"变了"才重算世界矩阵，省性能 | `_worldMatDirty` 标记 | `_transformChanged` |
+
+**常见 Bug 诊断：**
+- 子物体位置不对 → 父节点矩阵未更新 / 脏标记没置位
+- 旋转后坐标系错乱 → 世界空间 vs 局部空间计算错误
+- 大量节点移动卡顿 → 脏标记传播过深，需要手动 `updateWorldTransform()`
+
+### 7.2 渲染管线架构
+
+| 维度 | Cocos Creator 4.0 | LayaAir 3.3 |
+|------|-------------------|-------------|
+| **架构风格** | **FrameGraph**（声明式）：`RenderGraph` 描述整个帧的依赖关系 → `ExecutorContext` 执行 | **命令式**：`RenderContext3D` → `Laya3DRender` → 逐个 `CommandBuffer` 提交 |
+| **管线类型** | Forward / Deferred / Custom | 主要 Forward |
+| **渲染队列** | `RenderQueue`, `RenderInstancedQueue` | `BaseRender` 管理 `IRenderElement3D[]` |
+| **可见性** | `SceneCulling` 显式剔除 | 集成在渲染遍历中 |
+
+**Cocos FrameGraph 流程：**
+```
+RenderGraph 构建 → 资源依赖分析 → SceneCulling 剔除
+    → ExecutorContext 分配 GPU 资源 → 并行录制 CommandBuffer → 提交
+```
+
+**Laya 渲染流程：**
+```
+RenderContext3D 每帧遍历 → Camera culling → 
+    Laya3DRender.render() → BaseRender 排序 → CommandBuffer.submit()
+```
+
+**常见 Bug 诊断：**
+- 某个 Pass 不渲染 → Cocos: FrameGraph 依赖链断了；Laya: BaseRender 没注册
+- 渲染顺序错乱 → Cocos: RenderQueue 优先级；Laya: `renderQueue` 排序
+
+### 7.3 剔除系统
+
+| 剔除类型 | 原理 | Cocos Creator 4.0 | LayaAir 3.3 |
+|---------|------|-------------------|-------------|
+| **视锥剔除** | 物体包围盒完全在摄像机视锥外 → 不渲染 | `SceneCulling.frustumCulling()` | Camera 遍历时 AABB 检测 |
+| **遮挡剔除** | 被前面物体完全挡住 → 不渲染 | 基于深度缓冲的 Occlusion Query | 无显式实现 |
+| **LOD** | 远处用低模 | `LODGroup` 组件 | `HLOD` / `LODGroup` 组件 |
+
+**常见 Bug：**
+- 物体在屏幕边缘消失 → 包围盒计算偏小 / 视锥检测过于激进
+- LOD 切换时有跳变 → LOD 距离阈值太近 / 缺少过渡混合
+
+### 7.4 合批与实例化
+
+| 概念 | 解释 | Cocos Creator 4.0 | LayaAir 3.3 |
+|------|------|-------------------|-------------|
+| **静态合批** | 不动的物体合并成一个大 Mesh | `StaticBatcher` | 编辑器预处理 |
+| **动态合批** | 小 Mesh 动态合并 | `DynamicBatcher` | `SpineInstanceBatch` (针对性) |
+| **GPU Instancing** | 一个 Draw Call 画多个相同物体 | `RenderInstancedQueue` + `InstancedBuffer` | `VertexBuffer.instanceBuffer` |
+
+**Draw Call 过多诊断：**
+- Cocos: 看 `RenderInstancedQueue` 是否启用 → 检查 Material 是否支持 instancing
+- Laya: 看 `instanceBuffer` 是否激活 → 检查 VertexBuffer 的 `_instanceBuffer` 标记
+- 通用: 同 Material 同 Mesh → 可合批；不同 Material → 需打断
+
+### 7.5 组件系统
+
+| 引擎 | 模式 | 添加方式 | 生命周期 |
+|------|------|---------|---------|
+| **Cocos** | `Node.addComponent<T>()`（类 Unity） | `node.addComponent(MyScript)` | `onLoad → start → update → onDestroy` |
+| **Laya** | `ComponentDriver` 注册 | `node.addComponentIntance(component)` | `_addComponent → _init → _update → _destroy` |
+
+**常见 Bug：**
+- 组件 `update` 不调用 → 没加到正确节点 / 组件被禁用
+- Cocos: `this.node` 为空 → `onLoad` 之前访问
+- Laya: 组件 `owner` 没设置 → 忘记调用 `_setOwner`
+
+### 7.6 资源生命周期
+
+| 概念 | 解释 | 关键点 |
+|------|------|--------|
+| **引用计数** | 资源被引用时+1，释放时-1，归零才真释放 | `Asset.addRef()` / `Asset.decRef()` |
+| **懒加载** | 用到才加载，不用不占内存 | 异步加载 → 回调设置 |
+| **资源释放** | 场景切换时清理 | 注意：纹理/Mesh 可能被多个对象共享 |
+
+**常见 Bug：**
+- 切换场景后纹理变黑 → 资源被提前释放 / 引用计数为 0
+- 内存泄漏 → 资源引用没释放（事件监听、闭包持有引用）
+- Cocos: `resources.load()` 后的纹理需要手动 `release()`
+- Laya: `Laya.loader.create()` → `texture.destroy()`
+
+### 7.7 引擎架构差异速查表
+
+| 场景 | Cocos Creator 4.0 做法 | LayaAir 3.3 做法 |
+|------|------------------------|-------------------|
+| 获取主摄像机 | `director.root.cameraList[0]` | `Scene3D._camera` |
+| 遍历场景节点 | `scene.walk(node => ...)` | `scene._children` 递归 |
+| 创建材质 | `new Material()` + `material.initialize({ effectAsset })` | `new Material()` + `material.setShaderName()` |
+| 设置 RenderTexture | `camera.targetTexture = rt` | `RenderTexture` + `CommandBuffer.drawToRenderTexture2D()` |
+| 强制更新变换 | `node.updateWorldTransform()` | `sprite._update()` |
+| GPU Instancing | Material 勾选 `useInstancing` | `VertexBuffer.instanceBuffer = true` |
+
+---
+
+## 八、注意事项
 
 1. **不要对用户抛概念** — 除非用户问"为什么"，否则优先用引擎术语回答
 2. **诊断时先问问题** — 不要看一个模糊描述就给解决方案，按诊断树走
