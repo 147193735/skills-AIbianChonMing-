@@ -75,20 +75,19 @@ applyTo: "**"
 
 ## OpenGL ↔ 引擎翻译
 
-| OpenGL | Unity | Unreal | Godot | Cocos Creator 3.x | LayaAir 3.3 |
+| OpenGL | Unity | Unreal | Godot | Cocos Creator 4.0 | LayaAir 3.3 |
 |--------|-------|--------|-------|-------------------|-------------|
-| VAO+VBO | Mesh.vertices | FStaticMeshVertexBuffer | ArrayMesh | gfx.InputAssembler | VertexBuffer + VertexDeclaration |
-| glDrawElements | Graphics.DrawMesh | DrawPrimitive | draw() | gfx.CommandBuffer.draw() | CommandBuffer.drawMesh() |
-| FBO | RenderTexture | SceneCaptureComponent | ViewportTexture | gfx.Framebuffer | RenderTexture |
-| Depth Test | ZWrite/ZTest | Depth Stencil State | depth_draw_mode | gfx.DepthStencilState | RenderStateType.DepthTest |
-| Blend | Blend 命令 | Blend Mode | blend_mode | gfx.BlendState | BlendState + BlendComponent |
-| Mipmap | Generate Mip Maps | Texture Mip Gen | mipmaps | gfx.SamplerInfo.mipmap | FilterMode (Point/Bilinear/Trilinear) |
-| Shadow Map | Shadow settings | Light Mobility | Shadow settings | ShadowModule | ShadowCasterPass |
-| Uniform | Material.SetFloat() | Material Parameter | shader.set_shader_parameter() | Material.setProperty() | Material.setFloat() |
-| Instancing | GPU Instancing | ISMC Instancing | MultiMeshInstance | gfx.CommandBuffer | VertexBuffer.instanceBuffer |
-| Stencil | Stencil 命令 | Stencil Buffer | — | gfx.StencilState | StencilState |
-| Face Culling | Cull 命令 | Two Sided | cull_mode | gfx.RasterizerState.cullMode | CullMode (Off/Front/Back) |
-| Texture Wrap | Wrap Mode | Texture Addressing | wrap_mode | gfx.SamplerInfo.addressMode | WrapMode (Repeat/Clamp/Mirrored) |
+| VAO+VBO | Mesh.vertices | FStaticMeshVertexBuffer | ArrayMesh | InputAssembler + Buffer(Vertex) | VertexBuffer + VertexDeclaration |
+| FBO | RenderTexture | SceneCaptureComponent | ViewportTexture | Framebuffer + RenderPass | RenderTexture |
+| Depth Test | ZWrite/ZTest | Depth Stencil State | depth_draw_mode | DepthStencilState.depthTest | RenderStateType.DepthTest |
+| Blend | Blend 命令 | Blend Mode | blend_mode | BlendState + BlendTarget | BlendState + BlendComponent |
+| Mipmap | Generate Mip Maps | Texture Mip Gen | mipmaps | TextureFlagBit.GEN_MIPMAP | FilterMode (Point/Bilinear/Trilinear) |
+| Shadow Map | Shadow settings | Light Mobility | Shadow settings | shadow/shadow-flow.ts + CSM | ShadowCasterPass |
+| Uniform | Material.SetFloat() | Material Parameter | shader.set_shader_parameter() | DescriptorSet + PipelineLayout | Material.setFloat() |
+| Instancing | GPU Instancing | ISMC Instancing | MultiMeshInstance | instanced-buffer | VertexBuffer.instanceBuffer |
+| Stencil | Stencil 命令 | Stencil Buffer | — | DepthStencilState.stencilTest* | StencilState |
+| Face Culling | Cull 命令 | Two Sided | cull_mode | CullMode (NONE/FRONT/BACK) | CullMode (Off/Front/Back) |
+| Texture Wrap | Wrap Mode | Texture Addressing | wrap_mode | Address (WRAP/MIRROR/CLAMP) | WrapMode (Repeat/Clamp/Mirrored) |
 | Depth Bias | Depth Bias | Shadow Bias | depth_bias | RasterizerState.depthBias | ShadowMap.bias |
 
 ## 关键公式

@@ -126,21 +126,23 @@ description: OpenGL/图形学底层概念知识库。帮助 AI 理解渲染管�
 
 ## 四、OpenGL ↔ 引擎翻译表
 
-| OpenGL | Unity | Unreal | Godot | Cocos Creator 3.x | LayaAir 3.3 |
+| OpenGL | Unity | Unreal | Godot | Cocos Creator 4.0 | LayaAir 3.3 |
 |--------|-------|--------|-------|-------------------|-------------|
-| VAO+VBO | Mesh.vertices + SetVertexBufferParams | FStaticMeshVertexBuffer | ArrayMesh | gfx.InputAssembler + gfx.Buffer | VertexBuffer + VertexDeclaration |
-| glDrawElements | Graphics.DrawMesh | DrawPrimitive | draw() | gfx.CommandBuffer.draw() | CommandBuffer.drawMesh() |
-| FBO | RenderTexture | SceneCaptureComponent | ViewportTexture | gfx.Framebuffer + gfx.RenderPass | RenderTexture + InternalRenderTarget |
-| Depth Test | ZWrite, ZTest | Depth Stencil State | depth_draw_mode | gfx.DepthStencilState | RenderStateType.DepthTest/DepthFunc |
-| Blend | Blend 命令 | Blend Mode | blend_mode | gfx.BlendState | BlendState + BlendComponent |
-| Mipmap/Filter | Generate Mip Maps | Texture Mip Gen | mipmaps | gfx.SamplerInfo.mipmap | FilterMode (Point/Bilinear/Trilinear) |
-| Texture Wrap | Texture Wrap Mode | Texture Addressing | wrap_mode | gfx.SamplerInfo.addressMode | WrapMode (Repeat/Clamp/Mirrored) |
-| Shadow Map | Shadow settings | Light Mobility | Shadow settings | ShadowModule (pipeline) | ShadowCasterPass + ShadowSliceData |
-| Uniform | Material.SetFloat() | Material Parameter | shader.set_shader_parameter() | Material.setProperty() | Material.setFloat() / setTexture() |
-| Instancing | GPU Instancing | ISMC Instancing | MultiMeshInstance | gfx.CommandBuffer.draw() + instancing | VertexBuffer.instanceBuffer |
-| Stencil | Stencil 命令 | Stencil Buffer | — | gfx.StencilState | StencilState + RenderStateType.StencilTest |
-| Face Culling | Cull 命令 | Two Sided | cull_mode | gfx.RasterizerState.cullMode | CullMode (Off/Front/Back) |
-| glPolygonOffset | Depth Bias | Shadow Bias | depth_bias | RasterizerState.depthBias | ShadowCasterPass (bias params) |
+| VAO+VBO | Mesh.vertices + SetVertexBufferParams | FStaticMeshVertexBuffer | ArrayMesh | InputAssembler + Buffer(Vertex) | VertexBuffer + VertexDeclaration |
+| EBO/IBO | Mesh.triangles | FStaticMeshIndexBuffer | — | Buffer(Index) | IndexBuffer |
+| FBO | RenderTexture | SceneCaptureComponent | ViewportTexture | Framebuffer + RenderPass | RenderTexture + InternalRenderTarget |
+| Depth Test | ZWrite, ZTest | Depth Stencil State | depth_draw_mode | DepthStencilState.depthTest/depthWrite | RenderStateType.DepthTest/DepthFunc |
+| Depth Compare | ZTest | Depth Stencil State | depth_draw_mode | ComparisonFunc (LESS, EQUAL...) | CompareFunction (Less, Equal...) |
+| Stencil | Stencil 命令 | Stencil Buffer | — | DepthStencilState.stencilTestFront/Back | StencilState + RenderStateType.StencilTest |
+| Blend | Blend 命令 | Blend Mode | blend_mode | BlendState + BlendTarget | BlendState + BlendComponent |
+| Mipmap | Generate Mip Maps | Texture Mip Gen | mipmaps | TextureFlagBit.GEN_MIPMAP + sampler.mipFilter | FilterMode (Point/Bilinear/Trilinear) |
+| Texture Filter | Filter Mode | Texture Filtering | texture_filter | Filter (POINT/LINEAR/ANISOTROPIC) | FilterMode (Point/Bilinear/Trilinear) |
+| Texture Wrap | Wrap Mode | Texture Addressing | wrap_mode | Address (WRAP/MIRROR/CLAMP) | WrapMode (Repeat/Clamp/Mirrored) |
+| Face Culling | Cull 命令 | Two Sided | cull_mode | CullMode (NONE/FRONT/BACK) | CullMode (Off/Front/Back) |
+| Depth Bias | Depth Bias | Shadow Bias | depth_bias | RasterizerState.depthBias/depthBiasSlop | ShadowCasterPass bias params |
+| Shadow Map | Shadow settings | Light Mobility | Shadow settings | shadow/shadow-flow.ts + CSM | ShadowCasterPass + ShadowSliceData |
+| Instancing | GPU Instancing | ISMC Instancing | MultiMeshInstance | instanced-buffer + render-instanced-queue | VertexBuffer.instanceBuffer |
+| Uniform | Material.SetFloat() | Material Parameter | shader.set_shader_parameter() | DescriptorSet + PipelineLayout | Material.setFloat() / setTexture() |
 
 ---
 
