@@ -4,7 +4,7 @@
 
 - **karpathy-guidelines**：四条编码行为规则（编码前思考、简洁优先、精准修改、目标驱动）
 - **grill-me**：设计压力测试技能，提到"grill me / 考我 / 追问"时触发
-- **opengl-concepts**：基于 learnopengl.com **全部教程**的 OpenGL 图形学概念知识库（含渲染管线、坐标系统、光照、PBR、高级渲染技术、Bug 诊断树、跨引擎翻译）
+- **opengl-concepts**：OpenGL 图形学概念技能，讨论渲染/着色器/光照/图形 Bug 时自动触发（关键词触发）
 - **typescript-safety**：TypeScript 类型安全规则，禁止不必要的 `as any`
 
 ---
@@ -165,129 +165,33 @@ Copilot 会逐一追问：锁的粒度是什么？超时时间怎么设？客户
 
 ```markdown
 ---
-applyTo: "**/*.{vert,frag,glsl,hlsl,shader,unity,usf,compute}"
+applyTo: "**"
 ---
 
-# OpenGL 图形学概念知识库
+# OpenGL 图形学概念技能
 
-> 基于 learnopengl.com 全部教程（Getting Started → Lighting → Advanced OpenGL → Advanced Lighting → PBR → In Practice）整理。
+## 触发条件
 
-当遇到渲染异常、shader 问题、画面 Bug、性能瓶颈时，使用此知识库。
+当用户讨论以下相关话题时，启用 OpenGL/图形学知识辅助回答：
 
-## 渲染管线
-
-顶点数据 → 顶点着色器 → [曲面细分] → [几何着色器] → 光栅化 → 片段着色器 → 深度/模板/混合 → 帧缓冲
-
-## 核心概念速查
-
-### 数据流
-- **VAO**: 顶点格式说明书 → Unity: Mesh.SetVertexBufferParams
-- **VBO**: 顶点数组 → Unity: Mesh.vertices
-- **EBO/IBO**: 索引数组 → Unity: Mesh.triangles
-- **FBO**: 渲染到纹理 → Unity: RenderTexture
-- **UBO**: 批量 uniform → Unity: MaterialPropertyBlock
-
-### 着色器
-- **顶点着色器**: 坐标变换，输出 gl_Position
-- **片段着色器**: 像素颜色，视觉核心
-- **几何着色器**: 增删改图元（可选）
-- **Uniform**: CPU→GPU 全局变量
-- **in/out**: 阶段间传递+插值
-
-### 纹理
-- **Mipmap**: 缩略图链，远处不闪烁
-- **纹理单元**: GL_TEXTURE0~31
-- **各向异性过滤**: 倾斜表面清晰度
-- **sRGB**: 纹理 sRGB 存储，着色器线性读取
-- **立方体贴图**: 6 张 → 天空盒/反射
-
-### 坐标系统
-1. 局部空间 → × Model
-2. 世界空间 → × View (LookAt)
-3. 观察空间 → × Projection
-4. 裁剪空间 → 透视除法 (/w)
-5. 屏幕空间 → glViewport
-
-### 光照
-- **冯氏**: Ambient + Diffuse + Specular
-- **Blinn-Phong**: H = normalize(L+V)
-- **平行光/点光源/聚光灯**: 方向、衰减、锥角
-- **阴影映射**: 深度图 + bias + PCF + CSM
-- **Gamma**: pow(color, 1/2.2)
-- **HDR**: 配 Tone Mapping (Reinhard/ACES)
-- **Bloom**: 提取亮部 → 高斯模糊 → 叠加
-- **延迟渲染**: G-Buffer (位置/法线/颜色/材质) → 逐像素光照
-- **SSAO**: 屏幕空间环境光遮蔽
-
-### PBR
-- Cook-Torrance BRDF = Lambert + NDF×G×F
-- D: GGX 法线分布；G: Smith 几何；F: Fresnel-Schlick
-- IBL: irradiance map + pre-filtered map + BRDF LUT
-
-### 高级
-- 模板测试: 轮廓/反射/遮罩
-- 混合: 关深度写入，远到近排序
-- 几何着色器: 爆破/法线可视化
-- 实例化: glDrawArraysInstanced
-- MSAA: 多重采样抗锯齿
-
-## Bug 诊断树
-
-### 颜色异常
-- 单个物体 → 材质/纹理/着色器 uniform
-- 全部物体 → Gamma/HDR/Tone Mapping
-- 一直偏暗 → Gamma/sRGB 转换遗漏
-
-### 几何异常
-- 不显示 → VAO 未绑定 / 面剔除反了
-- 位置错 → MVP 顺序 / 属性错位
-
-### 光影异常
-- 阴影锯齿 → Shadow Map 分辨率 / 缺 PCF
-- 阴影条纹 → bias 不够（痤疮）
-- 阴影分离 → bias 太大（彼得潘）
-- 法线贴图无效 → TBN 错误
-
-### 透明异常
-- 透明挡住透明 → 关 ZWrite，从远到近
-- 闪烁 → Z-Fighting
-
-### 后处理异常
-- Bloom 过强/弱 → 亮度阈值 / 模糊次数
-- G-Buffer 异常 → MRT 顺序不一致
-- SSAO 闪烁 → 缺 blur / 核大小
-
-### PBR 异常
-- 金属感异常 → Metalness/Roughness
-- 偏暗 → IBL 环境贴图质量
-- 菲涅耳消失 → F0 参数（金属≠非金属）
-
-## OpenGL ↔ 引擎翻译
-
-| OpenGL | Unity | Unreal | Godot |
-|--------|-------|--------|-------|
-| VAO+VBO | Mesh.vertices | FStaticMeshVB | ArrayMesh |
-| FBO | RenderTexture | SceneCaptureComp | ViewportTexture |
-| Depth Test | ZWrite/ZTest | Depth Stencil | depth_draw_mode |
-| Blend | Blend 命令 | Blend Mode | blend_mode |
-| Face Culling | Cull 命令 | Two Sided | cull_mode |
-| Shadow Map | Shadow settings | Light Mobility | Shadow settings |
-| Instancing | GPU Instancing | ISMC Instancing | MultiMeshInstance |
-| Uniform | Material.SetFloat() | Material Param | shader.set_shader_parameter() |
-
-## 关键公式
-- MVP = P × V × M（右乘）→ gl_Position
-- N·L = cosθ → 漫反射
-- H = normalize(L+V) → Blinn-Phong
-- Result = Src×Fsrc + Dst×Fdst → 混合
-- F = F0 + (1-F0)(1-H·V)^5 → Fresnel-Schlick
-- pow(color, 1/2.2) → Gamma 校正
+- **渲染管线 / 着色器 / GLSL** — 顶点/片段/几何着色器、shader 调试、内置变量
+- **光照与阴影** — 冯氏/Blinn-Phong/PBR 光照、阴影映射、PCF、CSM
+- **纹理与帧缓冲** — 纹理过滤、Mipmap、sRGB、FBO、MRT、后处理
+- **渲染 Bug 诊断** — 颜色异常、几何错乱、光影问题、透明遮挡、性能卡顿
+- **后处理效果** — HDR、Tone Mapping、Bloom、SSAO、抗锯齿
+- **跨引擎翻译** — Unity/Unreal/Godot/Cocos/Laya 中对应 OpenGL 概念的实现
+- **坐标与变换** — MVP 矩阵、摄像机、欧拉角、正交/透视投影
+- **引擎架构** — 场景图、渲染管线架构、剔除、合批、GPU Instancing
 
 ## 使用原则
+
 1. 优先用引擎术语回答，除非用户问"为什么"
-2. 诊断先追问缩小范围，再给方案
-3. 配合 CodeGraph 查引擎源码
-4. 来源：learnopengl.com 全部教程
+2. 诊断时先追问缩小范围，再给方案（参考诊断树）
+3. 配合 CodeGraph 查引擎源码定位具体实现
+
+## 详细知识库
+
+完整的 OpenGL 图形学知识库（含 70 个核心概念字典、8 分支诊断树、GLSL 速查、跨引擎翻译表、15 条数学公式、Cocos/Laya 源码映射表）见本项目 `skills/opengl-concepts/SKILL.md`。当触发上述话题时，AI 应自动读取该文件获取详细知识。
 ```
 
 ---
