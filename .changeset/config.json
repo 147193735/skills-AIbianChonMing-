@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
   "changelog": [
     "@changesets/changelog-github",
-    { "repo": "mattpocock/skills" }
+    { "repo": "147193735/skills-AIbianChonMing-" }
   ],
   "commit": false,
   "privatePackages": { "version": true, "tag": true },
