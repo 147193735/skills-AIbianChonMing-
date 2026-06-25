@@ -4,6 +4,7 @@
 
 - **karpathy-guidelines**：四条编码行为规则（编码前思考、简洁优先、精准修改、目标驱动）
 - **grill-me**：设计压力测试技能，提到"grill me / 考我 / 追问"时触发
+- **git-commit-convention**：Git 提交规范，AI 执行代码提交时自动遵循 conventional commits 格式
 - **opengl-concepts**：OpenGL 图形学概念技能，讨论渲染/着色器/光照/图形 Bug 时自动触发（关键词触发）
 - **typescript-safety**：TypeScript 类型安全规则，禁止不必要的 `as any`
 
@@ -273,5 +274,55 @@ applyTo: "**/*.{ts,tsx}"
 - 如果是**新增代码**中出现了不必要的 `as any` → 建议用具体类型替代
 - 如果是**已有遗留代码**中的 `as any` → 除非在相关改动范围附近，否则不动
 - 如果是你生成的代码中出现了 `as any` → 先自问"这里我真的不知道类型吗？"再使用
+```
+
+---
+
+## 第五步：创建 `git-commit-convention.instructions.md`
+
+在同一目录中新建文件 `git-commit-convention.instructions.md`，内容如下：
+
+```markdown
+---
+applyTo: "**"
+---
+
+# Git 提交规范
+
+当用户请求你**提交代码**（git commit / git push / "帮我推送" / 任何涉及代码提交的操作）时，必须提醒并遵循以下 Git 提交规范。
+
+## 提交信息格式
+
+每次 commit 必须写有意义的提交信息，遵循 conventional commits 格式：
+
+```
+<type>: <简短描述>
+```
+
+## 类型
+
+| 类型 | 使用场景 |
+|------|---------|
+| `feat` | 新功能（feature） |
+| `fix` | 修复 Bug |
+| `docs` | 仅文档变更 |
+| `style` | 不影响代码含义的格式变动（空格、格式化等） |
+| `refactor` | 重构（既不修复 Bug 也不添加功能） |
+| `perf` | 性能优化 |
+| `test` | 添加或修改测试 |
+| `chore` | 构建过程、辅助工具等杂项 |
+
+## 示例
+
+- `feat: 添加用户登录功能`
+- `fix: 修复空指针崩溃`
+- `docs: 更新 API 使用说明`
+- `chore: 合并上游 main 分支`
+
+## 行为规则
+
+1. 用户说"提交"或"推送"时，先问清楚本次变更内容，然后按上述格式生成提交信息
+2. 如果用户自己写了提交信息，检查是否符合格式，不符合时给出修正建议
+3. 生成提交信息时，用中文写描述（简短扼要），类型用英文
 ```
 
