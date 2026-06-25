@@ -5,8 +5,10 @@ This project includes a **Cursor project rule** so the Karpathy-inspired behavio
 ## In this repository
 
 1. Open the folder in Cursor.
-2. The rule [`.cursor/rules/karpathy-guidelines.mdc`](.cursor/rules/karpathy-guidelines.mdc) is committed with `alwaysApply: true`, so you do not need extra installation steps.
-3. In Cursor, you can confirm it under **Settings → Rules** (or the project rules UI), where `karpathy-guidelines` should appear.
+2. Two rules are committed:
+   - [`.cursor/rules/karpathy-guidelines.mdc`](.cursor/rules/karpathy-guidelines.mdc) — `alwaysApply: true`，行为准则自动生效。
+   - [`.cursor/rules/grill-me.mdc`](.cursor/rules/grill-me.mdc) — 设计压力测试，提到"grill me / 考我 / 追问"时触发。勾选式提问，末项支持自定义输入。
+3. In Cursor, you can confirm them under **Settings → Rules** (or the project rules UI).
 
 ## Use the same guidelines in another project
 
