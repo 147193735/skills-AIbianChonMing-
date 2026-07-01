@@ -19,6 +19,8 @@ Reachable only when you type them (`disable-model-invocation: true`).
 
 Model- or user-reachable (rich trigger phrasing so the model can reach for them).
 
+- **[code-standards](./code-standards/SKILL.md)** — Enforce project-specific coding standards: naming conventions, comment format, class ordering, UI lifecycle, and TypeScript best practices. Triggers when writing or reviewing `.ts`/`.tsx` files, or when another skill needs standards enforcement.
+
 - **[diagnosing-bugs](./diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.
 - **[tdd](./tdd/SKILL.md)** — Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.
 - **[domain-modeling](./domain-modeling/SKILL.md)** — Actively build and sharpen a project's domain model — challenge terms, stress-test with scenarios, update `CONTEXT.md` and ADRs inline.
