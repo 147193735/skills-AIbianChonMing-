@@ -19,7 +19,7 @@ Reachable only when you type them (`disable-model-invocation: true`).
 
 Model- or user-reachable (rich trigger phrasing so the model can reach for them).
 
-- **[code-standards](./code-standards/SKILL.md)** — Enforce project-specific coding standards: naming conventions, comment format, class ordering, UI lifecycle, and TypeScript best practices. Triggers when writing or reviewing `.ts`/`.tsx` files, or when another skill needs standards enforcement.
+- **[code-standards](./code-standards/SKILL.md)** — Enforce cqone/Laya TypeScript standards (naming, comments, UI lifecycle, Mo/Data suffixes). Proactively when writing/reviewing `.ts` or mentioning 代码规范. See [reference.md](./code-standards/reference.md) for cqone checklist.
 - **[laya-module-scaffold](./laya-module-scaffold/SKILL.md)** — Scaffold cqone/Laya biz or acts modules, auto-patch Modules.ts/Fns.ts, IDEA file templates, Protos checklist. Use when creating modules or mentioning laya scaffold / 模块脚手架.
 
 - **[diagnosing-bugs](./diagnosing-bugs/SKILL.md)** — Disciplined diagnosis loop for hard bugs and performance regressions: reproduce → minimise → hypothesise → instrument → fix → regression-test.

@@ -1,12 +1,28 @@
 ---
-description: Enforce project-specific coding standards — naming conventions, comment format, code ordering, UI class lifecycle, and TypeScript best practices. Auto-applies when editing TypeScript files.
+description: >-
+  Enforces cqone/Laya TypeScript coding standards — naming, comments, ordering,
+  UI lifecycle, Data/Mo suffixes. Auto-applies when editing TypeScript files.
 globs: '**/*.{ts,tsx}'
 alwaysApply: false
 ---
 
 # Coding Standards
 
+权威文档：`C:/myPro/doc/代码规范.md`  
+Agent Skill：`skills/engineering/code-standards/SKILL.md`（含 cqone 交付清单）
+
 当生成、修改或审查代码时，必须对照以下规则逐条检查。
+
+## 0. cqone 快速自检
+
+- 新文件：`@author` 拼音 + `@since yyyy-MM-dd`（IDEA CQ File Header，默认 `zhangyongkang`）
+- 域词统一（如 `alienLand`，禁止同义异名类名）
+- 布尔：`get isXxx()`，勿 `isXxx()` 当属性漏括号
+- 覆盖父类方法保持签名一致（含可选参数）
+- FGUI：`v` 前缀；`setCustomClass` 与 xml 组件名一致
+- Data 收包 `onSC*`、发包 `req*`；视图 `refresh*`
+- 功能商店 `Shop.csv`；活动商店 `ActivityShop.csv`
+- IDEA 格式化 scheme **tuoqi**（`Ctrl+Alt+L`）
 
 ## 1. 命名规范
 
@@ -56,7 +72,7 @@ alwaysApply: false
 
 1. 静态成员变量 → 2. 静态方法 → 3. 分区行 → 4. 非静态成员变量 → 5. 分区行 → 6. 构造方法 → 7. 普通成员方法
 
-分区用 `//* ************************` 分隔。
+分区用 `//* ************************************************************************` 分隔。
 
 ## 4. 编码规范
 
