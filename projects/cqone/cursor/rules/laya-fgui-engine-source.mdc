@@ -1,0 +1,16 @@
+---
+description: >-
+  When explaining Laya/FairyGUI runtime (mask, GButton, Radio, displayObject,
+  controllers), read skill laya-fgui-engine-source — not only cqone/bin/libs.
+alwaysApply: false
+---
+
+# Laya / FGUI 引擎源码
+
+查 **Laya / FairyGUI 运行机制**（遮罩、按钮 Radio、`displayObject`、控制器等）时：
+
+1. 读取 Agent Skill：**`laya-fgui-engine-source`**
+2. 优先 `C:/myPro/LayaAir-LayaAir_2.13.1` 与 `C:/myPro/FairyGUI-layabox-master` 的 **TS 源码**
+3. `cqone/bin/libs` 压缩 JS 仅作对照
+
+详细路径与步骤见该 skill 的 `SKILL.md`。

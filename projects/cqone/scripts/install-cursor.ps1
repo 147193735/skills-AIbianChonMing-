@@ -1,44 +1,36 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-  Link generic Cursor skills and rules into ~/.cursor (global).
+  Explicitly install cqone-specific Cursor skills and rules.
 
 .DESCRIPTION
-  - skills/karpathy-guidelines -> %USERPROFILE%\.cursor\skills\karpathy-guidelines
-  - .cursor/rules/karpathy-guidelines.mdc -> %USERPROFILE%\.cursor\rules\karpathy-guidelines.mdc
-  - .cursor/rules/grill-me.mdc -> %USERPROFILE%\.cursor\rules\grill-me.mdc
-
-  Project-specific skills are isolated under projects/<project>/ and require
-  their explicit installer. Existing non-link targets are preserved unless
+  This script is intentionally project-scoped. The root global installer only
+  installs generic skills. Existing non-link paths are preserved unless
   -ReplaceExisting is supplied.
 #>
 param(
-    [string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path,
+    [string]$ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path,
     [switch]$ReplaceExisting
 )
 
 $ErrorActionPreference = "Stop"
-
 $cursorSkills = Join-Path $env:USERPROFILE ".cursor\skills"
 $cursorRules = Join-Path $env:USERPROFILE ".cursor\rules"
-
-$links = @(
-    @{
-        Link   = Join-Path $cursorSkills "karpathy-guidelines"
-        Target = Join-Path $RepoRoot "skills\karpathy-guidelines"
-    },
-    @{
-        Link   = Join-Path $cursorRules "karpathy-guidelines.mdc"
-        Target = Join-Path $RepoRoot ".cursor\rules\karpathy-guidelines.mdc"
-    },
-    @{
-        Link   = Join-Path $cursorRules "grill-me.mdc"
-        Target = Join-Path $RepoRoot ".cursor\rules\grill-me.mdc"
-    }
+$skillNames = @(
+    "acts-module",
+    "code-check",
+    "code-standards",
+    "fgui-ui-elements",
+    "fgui-ui-naming",
+    "laya-fgui-engine-source",
+    "laya-module-scaffold",
+    "my-features"
 )
+$ruleNames = @("code-standards.mdc", "laya-fgui-engine-source.mdc")
 
-function Set-RepoLink {
+function Set-ProjectLink {
     param([string]$Link, [string]$Target)
+
     if (-not (Test-Path -LiteralPath $Target)) {
         throw "Target not found: $Target"
     }
@@ -51,9 +43,7 @@ function Set-RepoLink {
         Remove-Item -LiteralPath $Link -Recurse -Force
     }
     $parent = Split-Path -Path $Link -Parent
-    if (-not (Test-Path $parent)) {
-        New-Item -ItemType Directory -Path $parent -Force | Out-Null
-    }
+    New-Item -ItemType Directory -Path $parent -Force | Out-Null
     if (Test-Path -LiteralPath $Target -PathType Container) {
         New-Item -ItemType Junction -Path $Link -Target $Target | Out-Null
     } else {
@@ -67,10 +57,11 @@ function Set-RepoLink {
     Write-Host "linked $Link -> $Target"
 }
 
-foreach ($item in $links) {
-    Set-RepoLink -Link $item.Link -Target $item.Target
+foreach ($name in $skillNames) {
+    Set-ProjectLink (Join-Path $cursorSkills $name) (Join-Path $ProjectRoot "skills\cursor\$name")
+}
+foreach ($name in $ruleNames) {
+    Set-ProjectLink (Join-Path $cursorRules $name) (Join-Path $ProjectRoot "cursor\rules\$name")
 }
 
-Write-Host ""
-Write-Host "Generic Cursor config installed from: $RepoRoot"
-Write-Host "Project-specific skills require an explicit projects/<project>/ installer."
+Write-Host "cqone Cursor skills installed from: $ProjectRoot"
