@@ -9,8 +9,11 @@ This archive contains workflows specific to the cqone Laya/FairyGUI project and 
 | Cursor | 8 | `skills/cursor/` |
 | VS Code / Copilot | 8 | `skills/vscode/` |
 | Codex | 9 | `skills/codex/` |
+| WorkBuddy | 9 | `skills/workbuddy/` |
 
 The Codex archive additionally contains `gain-reward-prize-type`. Several same-named skills differ between agents, so the two directories are preserved independently and must not be overwritten by bulk synchronization.
+
+The WorkBuddy archive is derived from the Codex archive (same 9 skills, same rule bodies) with WorkBuddy-specific path adaptations, so WorkBuddy and CodeBuddy stay on identical skill content.
 
 Cursor-specific rules are under `cursor/rules/`. VS Code / Copilot project instructions are under `skills/vscode/`; install them with `scripts/install-vscode.ps1`. The cqone VS Code setup guide is [VSCODE.md](VSCODE.md).
 
@@ -22,6 +25,7 @@ Project skills are never installed by the root global installer. Use one of thes
 powershell -ExecutionPolicy Bypass -File projects/cqone/scripts/install-cursor.ps1
 powershell -ExecutionPolicy Bypass -File projects/cqone/scripts/install-codex.ps1
 powershell -ExecutionPolicy Bypass -File projects/cqone/scripts/install-vscode.ps1
+powershell -ExecutionPolicy Bypass -File projects/cqone/scripts/install-workbuddy.ps1
 ```
 
 Both scripts refuse to replace a non-link skill by default. After reviewing the target, pass `-ReplaceExisting` to replace it with the archived project variant.
