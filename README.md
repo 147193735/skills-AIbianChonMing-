@@ -1,3 +1,11 @@
+> **新电脑 / 首次使用：请先读 [`SETUP.md`](./SETUP.md)**
+> New machine? Read [`SETUP.md`](./SETUP.md) first — it is this repo's installation entry point
+> (Cursor / Codex / VS Code / WorkBuddy / CodeBuddy 技能一键安装).
+>
+> 下方 README 内容继承自**上游项目**（Karpathy 编码准则），不是本仓库的安装说明。
+
+---
+
 # Karpathy-Inspired Claude Code Guidelines
 
 > Check out my new project [Multica](https://github.com/multica-ai/multica) — an open-source platform for running and managing coding agents with reusable skills.

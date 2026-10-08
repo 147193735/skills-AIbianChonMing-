@@ -1,4 +1,12 @@
-# Skill Scope Policy
+# Agent Instructions
+
+## 新电脑 / 首次使用
+
+**先读 [`SETUP.md`](./SETUP.md)** —— 本仓库的安装入口，一条命令装好全部平台的技能。
+
+For setup on a new machine, read [`SETUP.md`](./SETUP.md) first; it is the installation entry point.
+
+## Skill Scope Policy
 
 This repository separates reusable skills from project skills.
 
