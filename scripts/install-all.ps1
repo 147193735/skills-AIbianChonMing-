@@ -56,6 +56,9 @@ foreach ($index in $indexes | Select-Object -Unique) {
     if (Test-Path (Join-Path $projectRoot "scripts\install-workbuddy.ps1")) {
         Invoke-Installer (Join-Path $projectRoot "scripts\install-workbuddy.ps1")
     }
+    if (Test-Path (Join-Path $projectRoot "scripts\install-codebuddy.ps1")) {
+        Invoke-Installer (Join-Path $projectRoot "scripts\install-codebuddy.ps1")
+    }
 }
 
 Write-Host "All selected generic and project skills installed."

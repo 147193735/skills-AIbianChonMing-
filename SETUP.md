@@ -32,6 +32,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-all.ps1 -ReplaceExist
 - Cursor：`%USERPROFILE%\.cursor\skills`、`%USERPROFILE%\.cursor\rules`
 - Codex：`%USERPROFILE%\.codex\skills`
 - WorkBuddy：`%USERPROFILE%\.workbuddy\skills`
+- CodeBuddy：`%USERPROFILE%\.codebuddy\skills`
 - VS Code：`%APPDATA%\Code\User\prompts`
 - VS Code Copilot skills：`%USERPROFILE%\.copilot\skills`
 
