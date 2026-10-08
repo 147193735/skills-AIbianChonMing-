@@ -37,6 +37,7 @@ Agent 常用摘要与增量约定：[reference.md](reference.md)
 - [ ] **后续新增同样要注释**：在已有模块/类里**新加**的方法、字段、getter，与新建时同一套注释规则；勿只给脚手架首版加注释、后续增量漏掉。改旧文件时**不必**给未改动的旧方法补注释
 - [ ] **新建 Data/View 排版**：按「新建模块 Data/View 排版」分区；Data 字段必注释；getter 进自定义对外接口；勿为排版重排旧文件
 - [ ] **职责边界**：自己的事自己做（缓动/特效/资源由持有者在生命周期内自清）；Win 只编排，不代子组件清内部状态
+- [ ] **避免过度封装**：已有明确枚举/阶段字段（如 `stage`、`rechargeState`）时，调用方直接比较常量；禁止再包一层仅透传比较的 `isXxx`/`canXxx`/`getXxxTip`（见「过度封装」）
 - [ ] 命名与模块域词统一（dungeon/rahi/alienLand 等，不另造同义词）
 - [ ] 类后缀正确（Data/Event/Const/Mo/Co/Po/Win/Pop/Cell/Li/Com）
 - [ ] 布尔状态用 is/has/can/need/allow 前缀；优先 getter 而非无参方法
@@ -103,6 +104,9 @@ Agent 常用摘要与增量约定：[reference.md](reference.md)
 
 判定：注释主要在**提醒读者怎么操作/别踩坑**，而不是说明字段或方法**职责** → 对话说，代码删。  
 已入库的此类注释：用户触发「检查代码」时由 [code-check](../code-check/SKILL.md) **直接删除**（有价值则在检查报告里复述）。
+过度封装：写改时按本 skill「过度封装」禁写；「检查代码」时由 code-check 清单 G **顺带报告**（默认不改）。
+无用 import / 高置信私有死代码：「检查代码」时由 code-check 清单 H **直接删除**（export/注册入口只报不删）。
+
 
 | 对象 | 要求 |
 |------|------|
@@ -210,7 +214,7 @@ onLogout(isReconnect: boolean): void { ... }
 | `onRemovedFromStage` | 清理；`listenMgr` 已自动 off；**本类持有的 Tween/Mv 等在此自清** |
 | `refreshXxx` | 按数据粒度刷新 |
 
-职责边界详见 [reference.md](reference.md)「职责边界（自己的事自己做）」。
+职责边界详见 [reference.md](reference.md)「职责边界（自己的事自己做）」；避免对 stage/枚举再包一层见同文件「过度封装」。
 
 FGUI：`super(pkg, resName)` + `setCustomClass("GoodsXxxItem", XxxItem)` 与 xml 组件名一致。  
 **仅注册本包业务组件**；`Btn_a_r` / `Btn_a_y` / `CostCom` / `RelateFnBtn` 等已在 `BasicViews.init()` 全局注册，勿在 Win/Pop 构造函数重复 `setCustomClass`（详见 [reference.md](reference.md)「setCustomClass 与 BasicViews」）。
@@ -268,6 +272,7 @@ FGUI：`super(pkg, resName)` + `setCustomClass("GoodsXxxItem", XxxItem)` 与 xml
 ## 编码禁忌
 
 - **自己的事自己做（封装）**：对象自己的状态与副作用由自己管理；父级/编排者只调公开接口，不代清内部细节（见下）
+- **避免过度封装**：对已有枚举/阶段字段不要再包一层无信息量的 `is/can/getTip`（见下「过度封装」）
 - 不要将 `Po` 直接当信息对象用
 - 不写无意义的 get/set 透传
 - `Long` 仅在协议域；业务用 `string`（id）或 `number`（数值）
@@ -287,6 +292,32 @@ FGUI：`super(pkg, resName)` + `setCustomClass("GoodsXxxItem", XxxItem)` 与 xml
 | `Data` | 协议与状态；动画结束由 Win 回调再发包 | 用固定 Timer 硬编码子组件动画时长（真动画应由 View 驱动） |
 
 典型反例：关界面后位置错乱——父级 `setXY` 还原但未停子组件缓动，或缓动完成回调在中断后仍执行。正确做法：子组件 `resetFly`/`onRemovedFromStage` 内自清；Win 用 token/`active` 丢弃过期回调。
+
+### 过度封装（无意义间接层）
+
+已有**明确枚举/阶段数值字段**时，优先直接比较常量；不要再包一层只做同一比较的 getter/方法。
+
+```typescript
+// ❌ 冗余：与 stage 表达同一事实，读者要猜以谁为准
+get isRipe(): boolean { return this.stage >= STAGE_RIPE; }
+get isInCoolDown(): boolean { return this.stage === STAGE_COOLDOWN; }
+get canGrowAction(): boolean { return !this.isInCoolDown && !this.isRipe; }
+getGrowActionBlockTip(): string { ... } // Data 里直接比 stage 即可
+
+// ✅ 调用方直接用字段
+if (mo.stage === STAGE_COOLDOWN) { ... }
+if (mo.stage >= STAGE_RIPE) { ... }
+if (mo.stage > STAGE_COOLDOWN && mo.stage < STAGE_RIPE) { ... }
+if (mo.rechargeState === PRIVILEGE_STATE_CAN_GAIN) { ... }
+```
+
+**允许保留**的封装（有信息增量）：
+
+- 组合多条件的业务判断：`canHarvest`（`hasFruit &&` 时间到）
+- 需计算的展示值：`coolDownLeftSec`
+- 需查表/遍历的结果：`canGainStage`（内部扫配置）
+
+**禁止**：同一事实用时间戳、`stage`、`isXxx` 多套并存；过早抽 tip/can 接口却只有一处调用。
 
 ---
 

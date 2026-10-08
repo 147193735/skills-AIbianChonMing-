@@ -57,7 +57,7 @@ codegraph 不可用（无索引/error）时再 Read；报告里对跟过链的�
 | 工具 | 典型用途 |
 |------|----------|
 | `ArrayUtil` | 遍历、过滤、求和、池化扩缩、乱序等 |
-| `Dic` / `LinkedDic` | 字典；有序遍历用 LinkedDic |
+| `Dic` / `LinkedDic` | 字典；有序遍历用 LinkedDic。`collectValues` 仅需值快照数组时用；禁为取 `[0]`/猜 actGroup；遍历用 `eachValue`/`values`，按 key 用 `get` |
 | `DicUtil` | 分组、数组↔字典/集合 |
 | `ObjectUtil` | 对象拷贝/合并/判空类操作 |
 | `StringUtil` / `Ubb` / `TemplateStr` | 字符串与模板 |

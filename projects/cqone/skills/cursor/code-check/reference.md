@@ -101,6 +101,35 @@ codegraph 不可用（无索引/error）时再 Read；报告里对跟过链的�
 - 红点 `RedDotTask`、少算 `dict.values.some`：两边都管 → **本 skill 从性能角度报**，改法仍按 code-standards。
 - 纯命名/常规注释补全：**不报**，交给 code-standards。
 - **对话提示型注释**：code-standards 禁写；本 skill 在「检查代码」时**直接删除**并在报告「已清理」复述（见 SKILL 清单 F）。
+- **过度封装**：code-standards 禁写；本 skill 在「检查代码」时按清单 G **只报告**（默认不改），归入「建议改」/必要时「必须改」。
+- **无用 import / 无用代码**：归入报告 **「建议删除」**，**禁止检查时自动删**；须用户审核同意后再删。零引用的预留/资源 API（`open*Win`、MvRes、TITLES、`get*Cos` 等）**同样进建议删除**，标「预留/资源，审核慎删」；**有引用则不报**。仅协议注册目标、父类空钩子不进建议删除。
+
+---
+
+## 无用 import / 无用代码
+
+| 动作 | 条件 |
+|------|------|
+| **建议删除** | 本文件未用的 `import`；零引用 `private`；全文零引用的模块 API（**含** `open*Win` / MvRes / TITLES / `get*Cos` 等预留，标「预留/资源，审核慎删」）；极稳妥的不可达死分支 |
+| **有引用不报** | 预留符号已接线（哪怕资源未到、early-return）→ 不算无用 |
+| **不进建议删除** | `onSC*` / `req*`、Fns/Wins/Protos/`setCustomClass` 注册目标、父类空钩子 |
+| **审核后删** | 用户明确同意整批或点名条目后才改文件；预留类未点名时勿随「整批删」误删 |
+| **不碰** | 未审核时改 H；为顺手重排仍在用的 import |
+
+「无用」= **定义外零引用**，一律进建议删除等审核；「预留」只影响报告标签与审核时是否慎删，**不再豁免上报**。
+
+---
+
+## 过度封装（检查要点）
+
+| 报 | 不报 |
+|----|------|
+| `get isRipe() { return this.stage >= RIPE; }` | `canHarvest` = 多条件组合 |
+| `canGainPrivilege` ≡ `rechargeState === CAN_GAIN` | `coolDownLeftSec` 计算展示 |
+| `isEffectCdEnd` ≡ `canGainEffect` | 查表 `canGainStage` |
+| 本模块再包一层 `isCanGainState` 别名 | 直接用 `CommonActMo.isCanGainState`（基类契约） |
+
+判定时**必须打开方法体**，勿仅凭命名猜测。
 
 ---
 

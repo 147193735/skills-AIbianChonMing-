@@ -89,7 +89,7 @@ cqone 清单：同目录 `SKILL.md` / `reference.md`
 
 ### 杂项
 
-- **自己的事自己做**：缓动/特效由持有者在生命周期内自清；Win 只编排，不代子组件 `Tween.clearAll`
+- **自己的事自己做**：缓动/特效由持有者在生命周期内自清；秒刷倒计时由持有 UI 的 Com/Item 自听 `SECONDS_CHANGE`；Win 只编排，不代子组件 `Tween.clearAll` 或代刷倒计时
 - 禁止将 `Po` 直接用作信息对象
 - 避免在 `any` 类型上点属性/方法
 - 优先组合而非类继承

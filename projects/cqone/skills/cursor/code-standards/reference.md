@@ -214,6 +214,29 @@ export default class XxxWin extends Win {
 
 ---
 
+## 过度封装（无意义间接层）
+
+已有**明确枚举/阶段数值字段**时，优先直接比较常量；不要再包一层只做同一比较的 getter/方法。
+
+```typescript
+// ❌ 冗余：与 stage / rechargeState 表达同一事实
+get isRipe(): boolean { return this.stage >= STAGE_RIPE; }
+get isInCoolDown(): boolean { return this.stage === STAGE_COOLDOWN; }
+get canGrowAction(): boolean { return !this.isInCoolDown && !this.isRipe; }
+get canGainPrivilege(): boolean { return this.rechargeState === PRIVILEGE_STATE_CAN_GAIN; }
+
+// ✅ 调用方直接用字段
+if (mo.stage === STAGE_COOLDOWN) { ... }
+if (mo.stage >= STAGE_RIPE) { ... }
+if (mo.rechargeState === PRIVILEGE_STATE_CAN_GAIN) { ... }
+```
+
+**允许保留**（有信息增量）：组合多条件（`canHarvest` = `hasFruit &&` 时间到）、需计算的展示值（`coolDownLeftSec`）、需查表结果（`canGainStage`）。
+
+**禁止**：同一事实用时间戳、`stage`、`isXxx` 多套并存；过早抽 tip/can 却只有一处调用。
+
+---
+
 ## 界面类生命周期（详）
 
 ```

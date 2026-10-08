@@ -29,6 +29,33 @@ Agent 常用摘要与增量约定：[reference.md](reference.md)
 
 ---
 
+## 写实现前先查工具类（硬性）
+
+写循环、分组、过滤、求和、配表归组、字典转换之前，**先找已有公开方法再写**。有等价接口就调用，禁止再手写同样的循环。
+
+1. 按动词在 `src/script/core/util/` 搜：`ArrayUtil`、`DicUtil`、`ObjectUtil`、`StringUtil`、`MathUtil`、`DateUtil`。
+2. 活动配表按 `activityGroup` 归组：先用 `ActDataUtil.cosToArrDic` / `cosToDic`；Goal 全量/增量用 `resetGoalsX` / `updateGoalsX`（旧模板 `resetGoals` / `updateGoals`）。一行一个 Mo 的组继续 `super.initCos()`，只有「一组多行只建一个 Mo」才重写 `initCos`。
+3. 同模块或相邻活动已有调用，照抄那个接口。
+4. 语义对不上才手写，并在回复里说明为什么没复用。
+
+对照表：[code-check reference「常用工具」](../code-check/reference.md)。
+
+### `Dic` / `LinkedDic.collectValues`（硬性）
+
+`collectValues()` **会分配新数组**，只在「需要值的快照数组」时用（再 sort、按下标扫、交给外部缓存）。
+
+| 场景 | 做法 |
+|------|------|
+| 需要全部值组成数组后再排序/下标访问 | `collectValues()`（或 `LinkedDic.values` 只读；要副本再用 collect） |
+| 遍历处理每个值 | `eachValue`；`LinkedDic` 可直接扫 `values` |
+| 按 key 取一个值 | `get(key)` |
+| 只想拿「某一个」值（如 `[0]`） | **禁止** `collectValues()?.[0]`；无业务 key 则重新设计，勿用无序 Dic 猜第一个 |
+| `ActMo` / `actGroup` 缺失 | **禁止**用配表 `collectValues` 猜组；直接返回 `null` |
+
+反例：`actGroup ?? growLevelCoDict.collectValues()?.[0]?.[0]?.activityGroup`（福树曾误用）。正例：`ItemData.getSameLvEquipItemCoGroups` 对 `groupBy` 结果 `collectValues` 后再按等级 sort。
+
+---
+
 ## 交付前自检（必做）
 
 ```
@@ -36,13 +63,15 @@ Agent 常用摘要与增量约定：[reference.md](reference.md)
 - [ ] **注释**：本类方法（含 private）均有精简 `/** */`；**父类覆盖 / `v*` FGUI 元素不加**（`v*` 仅人手写时保留）；优先单行，少用 `@param`/`@return`；**禁对话提示型注释**（坑/注意/需手动…改对话说，见「注释规范」）
 - [ ] **后续新增同样要注释**：在已有模块/类里**新加**的方法、字段、getter，与新建时同一套注释规则；勿只给脚手架首版加注释、后续增量漏掉。改旧文件时**不必**给未改动的旧方法补注释
 - [ ] **新建 Data/View 排版**：按「新建模块 Data/View 排版」分区；Data 字段必注释；getter 进自定义对外接口；勿为排版重排旧文件
-- [ ] **职责边界**：自己的事自己做（缓动/特效/资源由持有者在生命周期内自清）；Win 只编排，不代子组件清内部状态
+- [ ] **先查工具类再写**：分组/过滤/求和/配表归组先搜 `core/util` 与 `ActDataUtil`；已有公开方法则调用，禁止手写等价循环；`collectValues` 仅用于需要值快照数组，禁止为取 `[0]` 或猜 `actGroup` 而调用（见「写实现前先查工具类」/`collectValues`）
+- [ ] **职责边界**：自己的事自己做。展示文案由对象内部根据基本数据生成，外部只传 Mo / id / 数量 / 下标，不传拼好的字符串；缓动/特效/资源由持有者在生命周期内自清；秒刷倒计时由持有该 UI 的 Com/Item 自听 `SECONDS_CHANGE`，Win 不代刷；Win 只编排，不代子组件清内部状态
 - [ ] 命名与模块域词统一（dungeon/rahi/alienLand 等，不另造同义词）
 - [ ] 类后缀正确（Data/Event/Const/Mo/Co/Po/Win/Pop/Cell/Li/Com）
 - [ ] 布尔状态用 is/has/can/need/allow 前缀；优先 getter 而非无参方法
 - [ ] Data 收协议：on + 协议名去 Po；发协议：req 开头
 - [ ] 视图刷新方法：refresh 开头
 - [ ] FGUI 子节点：`v` + 语义 + 类型后缀（`vXxxTxt`/`vXxxBtn`/`vXxxMv`…）；抬 Win 禁泛名 `vRedDot`（见 [fgui-ui-naming](../fgui-ui-naming/SKILL.md)）
+- [ ] **列表默认复用**：可滚动 `GList` 在 `initUi` 里 `setVirtual()`（循环用 `setVirtualAndLoop`）；不可滚动、或必须按 `numChildren` 遍历全部项时才例外（见 reference「复用列表」）
 - [ ] 界面生命周期顺序与监听清理符合规范（listenMgr 自动 off）
 - [ ] 覆盖父类方法时签名与父类一致（含可选参数）
 - [ ] 无重复 import、无 Po 当 Mo 用、非必要不用 any
@@ -267,6 +296,7 @@ FGUI：`super(pkg, resName)` + `setCustomClass("GoodsXxxItem", XxxItem)` 与 xml
 
 ## 编码禁忌
 
+- **先查工具类再写**：分组、过滤、求和、配表归组等禁止手写已有工具的等价循环；`Dic.collectValues` 仅用于值快照数组（见「写实现前先查工具类」）
 - **自己的事自己做（封装）**：对象自己的状态与副作用由自己管理；父级/编排者只调公开接口，不代清内部细节（见下）
 - 不要将 `Po` 直接当信息对象用
 - 不写无意义的 get/set 透传
@@ -278,13 +308,29 @@ FGUI：`super(pkg, resName)` + `setCustomClass("GoodsXxxItem", XxxItem)` 与 xml
 
 ### 职责边界（自己的事自己做）
 
-封装的实践口诀：类管好自己的状态与清理，外界只编排。
+封装的实践口诀：类管好自己的状态、展示与清理，外界只编排。
+
+Item、Com、Cell、Mo 都是对象。自己要显示的文案，用手头的基本数据在内部接口里生成。外部只传入 Mo、id、数量、列表下标这类基本数据，不传入已经拼好的文案。
+
+```typescript
+// 外部只给基本数据
+cell.setData(logMo, idx);
+
+// 文案在对象内部
+setData(mo: XxxLogMo, idx: number): void {
+    this.vLogTxt.text = mo?.getTxt() || "";
+}
+```
+
+禁止 Win/Pop 先 `getTxt()` / 拼字符串，再 `setData(text)` 或直接改子组件文本。列表下标这类对象自己拿不到的基本数据可以传入；配色、倒计时、数量格式都在持有数据的对象里做。
+
+**秒刷 / 倒计时**：`SECONDS_CHANGE` 由持有该倒计时 UI 的 Com/Item 自己监听并刷新；Win/Pop 的 `refreshServerTime` 只处理本界面字段（及本层才有的逻辑，如冷却结束切阶段），禁止遍历子组件代跑 CD / 可领交互。详见 [reference.md](reference.md)「秒刷 / 倒计时归属」。
 
 | 角色 | 该做 | 不该做 |
 |------|------|--------|
-| `Item` / `Com` / `MvArea` 等子组件 | 自己的缓动 `Tween.clearAll(this)`、特效 `clear`、离台 `onRemovedFromStage` 还原 | 指望 Win 代清本对象上的 Tween |
-| `Win` / `Pop` | 流程编排（何时 `flyTo` / 播 mv / 发协议）、作废过期回调 | `Tween.clearAll(子节点)`、替子组件记 origin/清资源 |
-| `Data` | 协议与状态；动画结束由 Win 回调再发包 | 用固定 Timer 硬编码子组件动画时长（真动画应由 View 驱动） |
+| `Item` / `Com` / `MvArea` 等子组件 | 用基本数据自己生成文案；自己的缓动 `Tween.clearAll(this)`、特效 `clear`、离台还原；自听秒刷本组件倒计时 | 收外部拼好的字符串；指望 Win 代清本对象上的 Tween 或代刷倒计时 |
+| `Win` / `Pop` | 只传 Mo / id / 数量 / 下标，并编排流程；秒刷只刷本界面字段 | `setData(text)`、直接改子组件文案、`Tween.clearAll(子节点)`、代子组件跑秒刷 |
+| `Data` / `Mo` | 协议与状态，以及由此推出的展示文案（如 `getTxt()`） | 把展示串交给 View 再传回；用固定 Timer 硬编码子组件动画时长 |
 
 典型反例：关界面后位置错乱——父级 `setXY` 还原但未停子组件缓动，或缓动完成回调在中断后仍执行。正确做法：子组件 `resetFly`/`onRemovedFromStage` 内自清；Win 用 token/`active` 丢弃过期回调。
 

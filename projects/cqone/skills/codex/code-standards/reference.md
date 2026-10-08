@@ -201,13 +201,36 @@ export default class XxxWin extends Win {
 
 ## 职责边界（自己的事自己做）
 
-封装实践：对象自己的状态与副作用由自己管理；父级只编排、只调公开接口。
+封装实践：对象自己的状态、展示与副作用由自己管理；父级只编排、只调公开接口。
+
+Item、Com、Cell、Mo 都是对象。要显示什么文案，用基本数据在内部接口生成。外部只传 Mo、id、数量、列表下标，不传拼好的字符串。
+
+```typescript
+cell.setData(logMo, idx);
+
+setData(mo: XxxLogMo, idx: number): void {
+    this.vLogTxt.text = mo?.getTxt() || "";
+}
+```
+
+禁止 Win/Pop 先拼文案再 `setData(text)`，或直接写子组件文本。对象自己拿不到的下标可以传入；颜色、倒计时、数量格式在持有数据的对象内部做。
+
+### 秒刷 / 倒计时归属
+
+依赖 `ServerTimeEvent.SECONDS_CHANGE` 的倒计时、CD、可领态切换，由**持有该 UI 的对象自己听秒并刷新**；Win/Pop 不得在 `refreshServerTime` 里代刷子 Com/Item 的倒计时或交互。
 
 | 角色 | 该做 | 不该做 |
 |------|------|--------|
-| `Item` / `Com` / 子组件 | 本对象 Tween（`clearAll` / `coverBefore`）、Mv `clear`；`onRemovedFromStage` 还原自身 | 指望 Win 代清本对象缓动 |
-| `Win` / `Pop` | 流程（何时 fly / 播特效 / 发协议）；token 丢弃过期回调 | `Tween.clearAll(子节点)`、替子组件记 origin |
-| `Data` | 协议与数据；动画结束由 View 回调再发包 | 用固定 Timer 代替真动画时长 |
+| 子 `Com` / `Item`（如 Buff、果实格） | `onAddedToStage` 自听 `SECONDS_CHANGE`，刷本组件 CD / 可领交互；离台由 `listenMgr.offAll` | 指望 Win 每秒调 `refresh` / `refreshInteract` |
+| `Win` / `Pop` | 只刷本界面上的字段（如冷却气泡、状态文案）；以及本层才有的逻辑（如冷却结束重算阶段） | `refreshServerTime` 里遍历子组件代跑倒计时 |
+
+正例：`ActNationalDayBlessingTreeBuffAndLogCom` / `FruitItemCom` 自听秒；Win 的 `refreshServerTime` 只管 `vCoolDownTxt`、`vFruitItemStateTxt`、阶段切换。
+
+| 角色 | 该做 | 不该做 |
+|------|------|--------|
+| `Item` / `Com` / 子组件 | 用 Mo 等基本数据自己生成文案；本对象 Tween、Mv `clear`；`onRemovedFromStage` 还原自身；自管秒刷倒计时 | 收外部拼好的字符串；指望 Win 代清本对象缓动或代刷倒计时 |
+| `Win` / `Pop` | 传入基本数据、编排流程（何时 fly / 播特效 / 发协议）；秒刷只处理本界面字段 | `setData(text)`、直接改子组件文案、`Tween.clearAll(子节点)`、代子组件跑秒刷 |
+| `Data` / `Mo` | 协议、状态，以及由这些数据推出的展示文案（如 `getTxt()`）；动画结束由 View 回调再发包 | 把展示串丢给 View 再由 View 回传；用固定 Timer 代替真动画时长 |
 
 反例：关界面后格子位置错乱——父级 `setXY` 但子组件缓动未停，或完成回调在中断后仍跑。  
 正例：`XiangongTreasureRewardItem.resetFly` / `onRemovedFromStage` 自清；Win 只调 `flyTo`/`hideAfterFly`/`resetFly`。
@@ -231,6 +254,20 @@ hide → onRemovedFromStage
 
 - 数据少或同时变化：一个 `refreshData`
 - 数据多、变化频率不同：多个 `refreshXxx`
+
+## 复用列表（`setVirtual`）
+
+可滚动 `GList` 默认复用：`initUi` 里 `setVirtual()`，循环列表用 `setVirtualAndLoop()`，且必须在设置 `numItems` 之前。
+
+```typescript
+initUi(): void {
+    super.initUi();
+    this.vLogList.setVirtual();
+    this.vLogList.itemRenderer = Callback.get(this, this.renderLogItem);
+}
+```
+
+例外只有两类：列表不可滚动（没有 `ScrollPane`，`setVirtual` 会抛错）；或者业务必须用 `numChildren` / `getChildAt` 扫**全部**数据项。复用后 `numChildren` 只等于当前可见项。
 
 ---
 

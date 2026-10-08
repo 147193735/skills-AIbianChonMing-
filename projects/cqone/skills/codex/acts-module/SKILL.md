@@ -109,7 +109,7 @@ node <laya-module-scaffold>/scripts/scaffold-module.js <moduleName> --acts --sta
 - [ ] 通用领奖走 ActData.I.reqGainReward（或文档化的自有 CS 协议）；Goal 全量/增量用 ActDataUtil.resetGoalsX / updateGoalsX（旧模板则 resetGoals / updateGoals）
 - [ ] 恭喜获得弹窗：通用 `GainRewardView`（`WinId.GAIN_REWARD_POP`）。后端推 `SCPopupsGainItemReward` 会自动弹；若需客户端在动效/点亮后再弹，用 `GainRewardData.I.createFakePopupWithMo(items, fnId)`（参考 `FaxiangTreasureWin`）。两端勿叠弹
 - [ ] 恭喜获得 `vPrizeType`：在 `ShowRule.updateRewardItem` 里用 `gainRewardMo.configIdArr.get(mo.srcIdx)` 取奖池配置 id，再读表字段（如 `ifSpecialReward`）设 `item.vPrizeType.selectedIndex`（大奖角标一般为 `1`）。`reward` 为掉落包时**禁止**用包 id / 道具 id 本地缓存判断。参考 `SummerTreasureShowRule` / `DragonTreasureShowRule` / `TurnTableShowRule`。需要 `GainRareRewardView` 时才注册 `SortRule.filterRare`（同样走 configId）；不需要则勿注册
-- [ ] GroupMo 已设 coClass、moClass；按 activityGroup 取配置；登出 clear 路径正确
+- [ ] GroupMo 已设 coClass、moClass；按 activityGroup 取配置；登出 clear 路径正确。配表归组先用 `ActDataUtil.cosToArrDic` / `cosToDic`，禁止再手写 `eachValue` 分组循环；一行一个 Mo 走 `super.initCos()`，仅「一组多行只建一个 Mo」才重写 `initCos`
 - [ ] 红点挂 Fn / GroupMo.updateRedDot；init 不抢跑依赖后端数据的红点；刷红点走 RedDotTask；兄弟页签独立 Fn 禁止互相 `addChild`（见 code-standards「红点挂载」）
 - [ ] conf：Modules + Fns（FnId）+ Protos + 需要的 Wins/RedDots
 - [ ] setCustomClass 只注册本包组件；公共组件不靠 Win 再注册
