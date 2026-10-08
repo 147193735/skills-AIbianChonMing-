@@ -1,3 +1,10 @@
+> **新电脑 / 首次使用：请先读 [`SETUP.md`](./SETUP.md)**
+> 它是本仓库的安装入口，一条命令装好 Cursor / Codex / VS Code / WorkBuddy / CodeBuddy 的技能。
+>
+> 下方内容继承自**上游项目**（Karpathy 编码准则），不是本仓库的安装说明。
+
+---
+
 # 受 Karpathy 启发的 Claude Code 指南
 
 > 查看我的新项目 [Multica](https://github.com/multica-ai/multica) —— 一个用于运行和管理编码智能体的开源平台，支持可复用的技能。
