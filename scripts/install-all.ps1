@@ -14,6 +14,7 @@ function Invoke-Installer {
 }
 
 Invoke-Installer (Join-Path $RepoRoot "scripts\install-cursor-global.ps1")
+Invoke-Installer (Join-Path $RepoRoot "scripts\install-generic-global.ps1")
 
 $projectsRoot = Join-Path $RepoRoot "projects"
 $projects = Get-ChildItem $projectsRoot -Directory | Where-Object {

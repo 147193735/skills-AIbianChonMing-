@@ -12,7 +12,9 @@
 
 1. 克隆本仓库（见「前置条件」）。
 2. 在仓库根目录运行 `.\scripts\install-all.ps1`。
-   脚本会列出 `projects/` 下的可安装项目并询问编号——按需选择（安装 cqone 则输入其编号）或输入 `N` 跳过。
+   脚本会**先装好五个平台的通用技能**（Cursor / Codex / WorkBuddy / CodeBuddy / VS Code），
+   再列出 `projects/` 下的可安装项目并询问编号——按需选择（安装 cqone 则输入其编号）或输入 `N` 跳过。
+   若只需要通用技能，在项目询问处输入 `N` 即可。
 3. 若脚本报告「拒绝替换非链接路径」而停止，**先向用户确认目标可被替换**，再决定是否加 `-ReplaceExisting`。
    不要擅自覆盖用户已有文件。
 4. 提示用户**重启**对应软件（Cursor / Codex / VS Code / WorkBuddy / CodeBuddy），使技能被重新发现。
@@ -48,12 +50,24 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-all.ps1 -ReplaceExist
 
 ### 通用技能（对所有项目生效）
 
-| 目标 | 内容 | 来源 |
-| --- | --- | --- |
-| Cursor | 技能 + 规则 | `skills/`、`.cursor/rules/` |
+统一脚本会先安装以下通用内容（`skills/deprecated/` 不安装）：
 
-由 `scripts/install-cursor-global.ps1` 完成。通用内容保持项目无关；项目专属技能**不会**
-通过根目录通用安装器混入通用技能库。`skills/deprecated/` 不安装。
+| 目标 | 内容 | 来源 | 安装器 |
+| --- | --- | --- | --- |
+| Cursor | `karpathy-guidelines` 技能 + 2 条规则 | `skills/karpathy-guidelines/`、`.cursor/rules/` | `scripts/install-cursor-global.ps1` |
+| Codex | `karpathy-guidelines`、`grill-me` 技能 | `skills/` | `scripts/install-generic-global.ps1` |
+| WorkBuddy | 同上 | 同上 | 同上 |
+| CodeBuddy | 同上 | 同上 | 同上 |
+| VS Code / Copilot | 同上（落在 `%USERPROFILE%\.copilot\skills`） | 同上 | 同上 |
+
+`install-generic-global.ps1` 支持 `-Platforms codex,vscode` 只装其中几个平台、
+`-Skills grill-me` 只装其中几个技能；脚本是幂等的，目标已是指向仓库的链接时直接跳过，
+重复执行安全。Cursor 侧不装 `grill-me` 技能——它在 Cursor 里以规则
+`.cursor/rules/grill-me.mdc` 的形式生效。
+
+通用内容保持项目无关；项目专属技能**不会**通过根目录通用安装器混入通用技能库。
+VS Code 的 `prompts\*.instructions.md` 属用户级配置，本仓库没有对应的通用源文件，
+脚本不会创建或改动它们。
 
 ### 项目专属技能
 
@@ -111,6 +125,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-all.ps1 -ReplaceExist
 
 ## 已知注意事项
 
+- **执行策略**：若 `Get-ExecutionPolicy` 返回 `Restricted`，脚本无法直接运行（报
+  `PSSecurityException`）。用 `powershell -ExecutionPolicy Bypass -File .\scripts\install-all.ps1`
+  调起，或先在当前进程内 `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force`
+  再执行，无需改动机器级策略。
+- **重新链接已存在的 Junction 可能被安全删除机制拦截**：部分环境会拦截 `Remove-Item` 并把
+  Junction 送去回收站，导致删除失败后链接反而丢失。因此安装器改为幂等实现——目标已是正确
+  链接时直接跳过、不做任何删除。若链接意外丢失，重跑安装器即可恢复。
 - `projects/cqone/skills/*/laya-module-scaffold/IDEA.md` 中的 IDEA External Tool 参数是
   **绝对路径**。若仓库不在 `C:\myGit\skills-AIbianChonMing-`，需按实际位置修改后再在
   IDEA 中配置该外部工具。
