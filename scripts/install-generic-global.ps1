@@ -29,7 +29,7 @@ param(
     [string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path,
     [ValidateSet("codex", "workbuddy", "codebuddy", "vscode")]
     [string[]]$Platforms = @("codex", "workbuddy", "codebuddy", "vscode"),
-    [string[]]$Skills = @("karpathy-guidelines", "grill-me"),
+    [string[]]$Skills = @("karpathy-guidelines", "grill-me", "skill-variant-sync"),
     [switch]$ReplaceExisting
 )
 

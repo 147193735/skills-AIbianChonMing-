@@ -6,6 +6,13 @@
 
 For setup on a new machine, read [`SETUP.md`](./SETUP.md) first; it is the installation entry point.
 
+## Multi-Platform Variants (hard rule)
+
+同一技能在 `codebuddy` / `codex` / `cursor` / `vscode` / `workbuddy` 下各有一份变体。
+**改动任一变体，必须同步所有变体**（VS Code 的 `<skill>.instructions.md`、Cursor 的 `rules/*.mdc` 一并改）；
+**禁止整目录覆盖或批量拷贝**——各变体正文可能有意不同。新增技能要同时更新对应
+`install-*.ps1` 的技能名白名单。详见技能 `skill-variant-sync`。
+
 ## Skill Scope Policy
 
 This repository separates reusable skills from project skills.

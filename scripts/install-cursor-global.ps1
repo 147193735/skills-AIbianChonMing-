@@ -5,6 +5,7 @@
 
 .DESCRIPTION
   - skills/karpathy-guidelines -> %USERPROFILE%\.cursor\skills\karpathy-guidelines
+  - skills/skill-variant-sync -> %USERPROFILE%\.cursor\skills\skill-variant-sync
   - .cursor/rules/karpathy-guidelines.mdc -> %USERPROFILE%\.cursor\rules\karpathy-guidelines.mdc
   - .cursor/rules/grill-me.mdc -> %USERPROFILE%\.cursor\rules\grill-me.mdc
 
@@ -34,6 +35,10 @@ $links = @(
     @{
         Link   = Join-Path $cursorRules "grill-me.mdc"
         Target = Join-Path $RepoRoot ".cursor\rules\grill-me.mdc"
+    },
+    @{
+        Link   = Join-Path $cursorSkills "skill-variant-sync"
+        Target = Join-Path $RepoRoot "skills\skill-variant-sync"
     }
 )
 

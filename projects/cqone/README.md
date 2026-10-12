@@ -16,6 +16,8 @@ The Codex archive additionally contains `gain-reward-prize-type`. Several same-n
 
 The WorkBuddy and CodeBuddy archives are derived from the Codex archive (same 9 skills, same rule bodies) with platform-specific path adaptations, so WorkBuddy, CodeBuddy, and Codex stay on identical skill content.
 
+**Editing rule**: a change to any variant must be applied to **all five** variants in the same session (`codebuddy` / `codex` / `cursor` / `vscode` / `workbuddy`), including the VS Code `<skill>.instructions.md` and the Cursor `cursor/rules/*.mdc` summaries. Never bulk-copy one variant over another. Adding a skill also means updating the `$skillNames` whitelist in every `scripts/install-*.ps1`. See the generic skill `skill-variant-sync`.
+
 Cursor-specific rules are under `cursor/rules/`. VS Code / Copilot project instructions are under `skills/vscode/`; install them with `scripts/install-vscode.ps1`. The cqone VS Code setup guide is [VSCODE.md](VSCODE.md).
 
 ## Explicit Installation
