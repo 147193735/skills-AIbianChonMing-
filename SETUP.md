@@ -50,7 +50,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-all.ps1 -ReplaceExist
 
 ### 通用技能（对所有项目生效）
 
-统一脚本会先安装以下通用内容（`skills/deprecated/` 不安装）：
+统一脚本会先安装以下通用内容；`skills/` 下只有**顶层技能目录**参与安装，
+`deprecated/`、`engineering/`、`productivity/` 等分类子目录是参考资料（含同名技能的
+英文原版），**不是安装源，改它们不生效**：
 
 | 目标 | 内容 | 来源 | 安装器 |
 | --- | --- | --- | --- |
@@ -59,6 +61,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-all.ps1 -ReplaceExist
 | WorkBuddy | 同上 | 同上 | 同上 |
 | CodeBuddy | 同上 | 同上 | 同上 |
 | VS Code / Copilot | 同上（落在 `%USERPROFILE%\.copilot\skills`） | 同上 | 同上 |
+| VS Code prompts | `grill-me`、`karpathy-guidelines`、`skill-variant-sync` 的 `*.instructions.md` | `skills/<skill>/<skill>.instructions.md` | `scripts/install-vscode-prompts.ps1` |
 
 `install-generic-global.ps1` 支持 `-Platforms codex,vscode` 只装其中几个平台、
 `-Skills grill-me` 只装其中几个技能；脚本是幂等的，目标已是指向仓库的链接时直接跳过，
@@ -66,8 +69,16 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-all.ps1 -ReplaceExist
 `.cursor/rules/grill-me.mdc` 的形式生效。
 
 通用内容保持项目无关；项目专属技能**不会**通过根目录通用安装器混入通用技能库。
-VS Code 的 `prompts\*.instructions.md` 属用户级配置，本仓库没有对应的通用源文件，
-脚本不会创建或改动它们。
+
+VS Code 的 `prompts\*.instructions.md` 属用户级配置，安装方式分两段：
+
+- **通用技能**（`grill-me`、`karpathy-guidelines`、`skill-variant-sync`）由
+  `install-vscode-prompts.ps1` 从 `skills/<skill>/<skill>.instructions.md` 链接进去；
+  新增通用技能只要把同名的 `.instructions.md` 放在技能目录里就会被自动安装。
+- **项目专属**由各项目自己的 `install-vscode.ps1` 复制进去。
+
+两者都**只覆盖有仓库源文件的同名 prompts**；用户自己手工创建、仓库里没有源的同名文件
+（例如 `typescript-safety`、`git-commit-convention`）不会被改动或删除，也不会被同步。
 
 ### 项目专属技能
 

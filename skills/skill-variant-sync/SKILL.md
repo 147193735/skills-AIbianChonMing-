@@ -13,6 +13,12 @@ description: >-
 本仓库是**多平台技能分发仓库**：同一技能在多个 AI 工具下各有一份变体。
 **改动任何一个变体，必须在同一会话内同步到所有变体**，否则换工具做同一件事就会漏规则。
 
+**单源技能也可能有多个形态**：例如 `grill-me` 就有三份——
+`skills/grill-me/SKILL.md`（Codex / WorkBuddy / CodeBuddy / Copilot 共用）、
+`.cursor/rules/grill-me.mdc`（Cursor 规则，frontmatter 是 `description` + `globs` + `alwaysApply`）、
+`skills/grill-me/grill-me.instructions.md`（VS Code prompts，frontmatter 是 `applyTo`）。
+三份正文不同（各写各工具的互动选择题 API）但**规则必须等价**，改一个就要改另外两个。
+
 ## 触发时机（必做）
 
 - 新建 / 修改 / 删除 / 重命名技能或其中任何文件
@@ -26,9 +32,16 @@ description: >-
 | 通用技能（单源，5 平台共用） | `skills/<skill>/` |
 | 项目技能变体 | `projects/<project>/skills/codebuddy/`、`.../codex/`、`.../cursor/`、`.../vscode/`、`.../workbuddy/` |
 | Cursor 规则 | `projects/<project>/cursor/rules/*.mdc`、`.cursor/rules/*.mdc` |
+| VS Code prompts 源文件 | `skills/<skill>/<skill>.instructions.md`、`projects/<project>/skills/vscode/<skill>/<skill>.instructions.md`（安装到 `%APPDATA%\Code\User\prompts\`） |
 | 安装器 | `scripts/install-*.ps1`、`projects/<project>/scripts/install-*.ps1` |
 
-安装方式为 Junction 链接，改仓库源文件即生效；**新增技能必须同时更新安装器白名单**。
+安装方式为 Junction / HardLink，改仓库源文件即生效；**新增技能必须同时更新对应安装器白名单**
+（`install-cursor-global.ps1` 的 `$links`、`install-generic-global.ps1` 的 `$Skills`、
+项目 `install-*.ps1` 的 `$skillNames`）。
+通用 VS Code prompts 由 `scripts/install-vscode-prompts.ps1` 自动扫描
+`skills/*/*.instructions.md`（放对文件即被安装，无需改白名单）；
+项目 VS Code prompts 由 `projects/<project>/scripts/install-vscode.ps1` 复制。
+prompts 目录里**没有仓库源文件**的同名文件（如手工创建的）不会被覆盖，也不会被同步。
 
 ## 同步步骤
 

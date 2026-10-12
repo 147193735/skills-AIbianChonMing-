@@ -21,9 +21,21 @@
 
 ---
 
-## 第一步：创建 `karpathy-guidelines.instructions.md`
+## 第一步：安装 `karpathy-guidelines.instructions.md`（用安装器，别手抄）
 
-在上方目录中新建文件 `karpathy-guidelines.instructions.md`，内容如下：
+在仓库根目录执行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-vscode-prompts.ps1
+```
+
+脚本会把 `skills/karpathy-guidelines/karpathy-guidelines.instructions.md` 硬链接到全局
+prompts 目录（硬链接不可用时复制）。**源文件在仓库里，改仓库即生效**，因此不要手抄——
+手抄出来的副本不会跟随仓库更新，也不会被安装器同步。
+要覆盖已有的同名文件时加 `-ReplaceExisting`。
+
+<details>
+<summary>手工内容（仅离线时参考，非权威，以仓库源文件为准）</summary>
 
 ````markdown
 ---
@@ -108,11 +120,18 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 All reasoning, analysis, and responses must be in **Simplified Chinese (简体中文)**.
 ````
 
+</details>
+
 ---
 
-## 第二步：创建 `grill-me.instructions.md`
+## 第二步：安装 `grill-me.instructions.md`（用安装器）
 
-在同一目录中新建文件 `grill-me.instructions.md`，内容如下：
+同样由 `scripts\install-vscode-prompts.ps1` 从
+`skills/grill-me/grill-me.instructions.md` 链接安装（VS Code 侧用 `vscode_askQuestions`，
+Cursor 侧对应工具为 `AskQuestion`）。**不要手抄**。
+
+<details>
+<summary>手工内容（仅离线时参考，非权威，以仓库源文件为准）</summary>
 
 ```markdown
 ---
@@ -143,6 +162,8 @@ applyTo: '**'
 
 如果某个问题可以通过探索 codebase 回答，就去探索 codebase，而不是提问。
 ```
+
+</details>
 
 ---
 
@@ -184,7 +205,11 @@ Copilot 会逐一追问：锁的粒度是什么？超时时间怎么设？客户
 
 ---
 
-## 第三步：创建 `opengl-concepts.instructions.md`
+## 第三步：创建 `opengl-concepts.instructions.md`（手工，无仓库源）
+
+> 这一份**在仓库里没有源文件**，也不在任何安装器白名单里，属手工维护：
+> 装了也不会被覆盖，改仓库 `skills/opengl-concepts/SKILL.md` 也**不会**同步到它。
+> 需要同步就自己改，或先给仓库补一个 `opengl-concepts.instructions.md` 源文件。
 
 在同一目录中新建文件 `opengl-concepts.instructions.md`，内容如下：
 
