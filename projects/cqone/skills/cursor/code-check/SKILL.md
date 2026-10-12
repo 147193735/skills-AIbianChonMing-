@@ -8,13 +8,16 @@ description: >-
   (isXxx/canXxx that only alias enum/stage fields). Use when the user says
   检查代码, 性能检查, 代码性能, 算法性能, 有没有用通用方法, 复用检查,
   or asks to audit hot paths / Dic vs LinkedDic / ArrayUtil reuse on a module
-  or diff. Complements code-standards (naming/comments) and does not replace
-  Bugbot/security review.
+  or diff; also by-checks whether Win-class FGUI screens have the outermost
+  advanced group with container center-center/middle-middle adaptation
+  (skipped for CENTER/NONE posType like WIN_POP/POP). Use when the user says
+  屏幕适配, 居中适配, 高级组. Complements code-standards (naming/comments) and
+  does not replace Bugbot/security review.
 ---
 
-# cqone 代码检查（性能 + 通用方法 + 清注释/无用代码 + 过度封装）
+# cqone 代码检查（性能 + 通用方法 + 清注释/无用代码 + 过度封装 + FGUI 适配顺带查）
 
-**范围**：运行时性能、算法复杂度、是否复用项目已有通用能力；清理「对话提示型」注释；扫无用 import / 无用代码（**只报建议删除，审核后才删**）；扫「无意义枚举/阶段透传封装」。  
+**范围**：运行时性能、算法复杂度、是否复用项目已有通用能力；清理「对话提示型」注释；扫无用 import / 无用代码（**只报建议删除，审核后才删**）；扫「无意义枚举/阶段透传封装」；**顺带**检查 Win 类界面的 FGUI 屏幕适配（清单 I）。  
 **不做**：命名/常规注释补全/排版（→ [code-standards](../code-standards/SKILL.md)）；安全专项（→ review-security）；通用缺陷扫雷可另用 Bugbot/OCR。
 
 **默认检查对象**：用户指定的模块/文件；未指定则查当前打开文件或本次会话改动的 diff。
@@ -29,7 +32,8 @@ description: >-
 4. 只报**可行动**问题（有位置 + 原因 + 建议）。
 5. **落地清理仅限清单 F**：对话提示型注释 → **直接删除**，写进「已清理」。
 6. **清单 H（无用 import / 无用代码）禁止自动删除**：全文搜确认**定义外零命中**后写入报告 **「建议删除」**（含零引用的 `open*Win` / MvRes / TITLES / `get*Cos` 等预留 API，条目可标「预留/资源，审核慎删」）；**须等用户审核同意**后再删。仅协议注册目标、父类空钩子不进建议删除。
-7. 输出固定报告格式；其余项（含过度封装）**默认只报告，不改代码**。用户明确要求「一并改」再动手（仍不含未审核的 H 删除）。
+7. **顺带跑清单 I（FGUI 屏幕适配）**：范围内出现 Win 类界面（含新增/改动的 `XxxWin.ts` 及其 FGUI 组件）时必须查，并在报告里显式标注「必须改 / 不必改 + 原因」。
+8. 输出固定报告格式；其余项（含过度封装、清单 I）**默认只报告，不改代码**。用户明确要求「一并改」再动手（仍不含未审核的 H 删除）。
 
 ---
 
@@ -139,6 +143,26 @@ description: >-
 - [ ] 报告每条写清：`path` + 符号名 + 为何判无用（预留类写上标签）
 - [ ] 用户说「删建议删除」「同意删」或点名某条后，才删对应项，并记入「已清理」；预留类用户未点名时不要因「整批删」误删，应确认
 
+### I. FGUI 屏幕适配（Win 类界面，顺带查，硬性）
+
+**只查 Win 类界面**（`XxxWin` 及其加载的主组件），**不查** Pop / Item / Li / Com。
+
+判定顺序（先定 `posType` 再谈改不改）：
+
+1. 在 `XxxWin.ts` 取 `showStrategy`（`WinShowStrategy.*`），查 `src/script/biz/fn/data/WinShowStrategy.ts` 得到 `UiWinPosType`。
+2. 打开 `fgui/assets/<pkg>/<组件>.xml`，找**顶层** `<group ... advanced="true">`（无 `group="..."` 属性），看其 `<relation>` 是否为 `target=""` 且 `sidePair` 含 `center-center` 与 `middle-middle`。
+
+| `UiWinPosType` | 对应策略 | 是否必须改 |
+|----------------|----------|-----------|
+| `FULL_SCREEN` / `SAFE_SCREEN` / `SAFE_SIZE` | `WIN`、`WIN_SIMPLE`、`DOCK`、`DOCK_LOWER/UPPER`、`LOWER_POP`、`POP_SIMPLE`、`MSG`、`LOADING` | **必须改**：缺最外层高级组或缺少 `center-center,middle-middle` → 列进「必须改」 |
+| `CENTER` / `NONE` | `WIN_POP`、`POP`、`DOCK_TIP` | **不必改**：框架 `UiWinShowStrategy.layoutWin` 已整体居中（`setXY((layer.width-win.width)/2, …)`），内部按设计尺寸定位；再加容器居中会与框架居中叠加/冲突 |
+
+- [ ] 范围内每个 Win 组件按上表过一遍
+- [ ] **报告必须带「必须改 / 不必改」标签与一句原因**，禁止把 `WIN_POP`/`POP` 类界面当缺陷报
+- [ ] 不必改项只写进「已通过」一句，不进「必须改」
+
+依据（`UiWinShowStrategy.layoutWin` CENTER 分支）：`src/script/core/ui/UiWinShowStrategy.ts` 约 207–211 行 `win.ensureSizeCorrect(); win.setXY((layer.width - win.width) / 2, (layer.height - win.height) / 2);`
+
 ---
 
 ## 报告格式
@@ -147,7 +171,7 @@ description: >-
 ## 代码检查：<范围>
 
 ### 结论
-<一句话：有/无必须改项；性能/复用/过度封装各几条；建议删除几条待审核；是否清了提示注释>
+<一句话：有/无必须改项；性能/复用/过度封装各几条；建议删除几条待审核；是否清了提示注释；FGUI 适配几处必须改、几处按 CENTER/NONE 不必改>
 
 ### 必须改
 - `path:行号附近` — 问题 — 建议
@@ -167,6 +191,10 @@ description: >-
 ### 已清理
 - （提示注释）`path` — 原注释大意
 - （审核后删除）`path` — `符号`（仅当用户已确认）
+
+### FGUI 屏幕适配（顺带，见清单 I）
+- `fgui/assets/<pkg>/<组件>.xml`（`<策略名>` → `UiWinPosType.<X>`）— **必须改**：缺最外层高级组容器居中，需加 `<relation target="" sidePair="center-center,middle-middle"/>`
+- `fgui/assets/<pkg>/<组件>.xml`（`WIN_POP` → `CENTER`）— **不必改**：框架整体居中，内部按设计尺寸定位
 
 ### 已通过（可选，极短）
 - …

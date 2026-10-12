@@ -14,6 +14,7 @@ cqone 清单：同目录 `SKILL.md` / `reference.md`
 - 新文件：`@author zhangyongkang` + `@since yyyy-MM-dd`（CQ File Header；**禁止**抄邻近文件作者）
 - 域词统一；布尔用 `get isXxx()`；父类方法签名一致
 - FGUI `v` 前缀；`setCustomClass` 与 xml 同名；**勿重复注册 BasicViews 已有公共组件**（`Btn_a_r`/`Btn_a_y`/`CostCom`/`RelateFnBtn` 等）
+- Win 屏幕适配：`WIN`/`WIN_SIMPLE`/`DOCK*`/`LOWER_POP`/`POP_SIMPLE`/`MSG`/`LOADING`（`FULL_SCREEN`/`SAFE_SCREEN`/`SAFE_SIZE`）需最外层高级组 + 容器 `center-center,middle-middle`；`WIN_POP`/`POP`/`DOCK_TIP`（`CENTER`/`NONE`）由框架居中，不做也不补
 - `Shop.csv` vs `ActivityShop.csv` 勿混用
 
 ## 1. 命名规范

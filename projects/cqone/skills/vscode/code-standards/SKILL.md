@@ -54,6 +54,7 @@ Agent 常用摘要与增量约定：[reference.md](reference.md)
 - [ ] **红点挂载（`RedDots.ts`）**：先分清「同 Fn 子红点」vs「独立页签 Fn」；**禁止**把兄弟页签的 `getByFn(GOAL)` `addChild` 到另一页签 Fn（会串红点）；入口汇总靠 Function 父子/`ENTRY`；改 Fn 分层后必须重审 `createChildOfFn`/`addChild`（反例：至尊秘宝曾把 GOAL 挂到主玩法）
 - [ ] `setCustomClass`：公共组件（`Btn_a_r`/`Btn_a_y`/`CostCom`/`RelateFnBtn`/`ItemCell` 等）已在 `BasicViews.ts` 全局注册，Win/Pop **禁止再注册**；只注册本包业务组件
 - [ ] 超设计宽高的列表/区域：FGUI 外包 Com（如 `RewardCom`），`UiUtil.setVFields(com, this)` 挂到 Win，**不新建** Com 类（见 reference「外包 Com + setVFields」）
+- [ ] **Win 屏幕适配**：新增/改动 Win 界面时按 `showStrategy` 的 `UiWinPosType` 判断——`FULL_SCREEN`/`SAFE_SCREEN`/`SAFE_SIZE`（`WIN`、`WIN_SIMPLE`、`DOCK*`、`LOWER_POP`、`POP_SIMPLE`、`MSG`、`LOADING`）必须有最外层高级组 + `<relation target="" sidePair="center-center,middle-middle"/>`；`CENTER`/`NONE`（`WIN_POP`、`POP`、`DOCK_TIP`）由框架整体居中，**不需要**做，也不得补（详见 [code-check](../code-check/SKILL.md) 清单 G）
 - [ ] IDEA 格式化 scheme：tuoqi（Ctrl+Alt+L）
 - [ ] **acts 模块**：另过 [acts-module](../acts-module/SKILL.md) 选型与活动专属检查（`ActWin` / Data 模板 / 奖励 param / conf）
 - [ ] **功能归档**：新功能/换主包或 FnId 后更新 `C:/Users/lu/Desktop/MyFeatures`（见 [my-features](../my-features/SKILL.md)）；脚手架清单只放 `MyFeatures/checklists/`，禁止工程内 `*.scaffold-checklist.txt`

@@ -26,7 +26,8 @@ description: >-
 3. 按下方清单逐项检查；对「重复调用 / 缺防护 / 未复用」类结论，**必须跟到 callee 实现**再定论（见「跟链防误报」）。
 4. 只报**可行动**问题（有位置 + 原因 + 建议）。
 5. 标记对话提示型注释（见清单 F）；仅在用户明确要求一并修改时才删除，并在报告中说明。
-6. 输出固定报告格式；默认只报告，不改代码。
+6. **顺带跑清单 G（FGUI 屏幕适配）**：范围内出现 Win 类界面（含新增/改动的 `XxxWin.ts` 及其 FGUI 组件）时必须查，并在报告里显式标注「必须改 / 不必改 + 原因」。
+7. 输出固定报告格式；默认只报告，不改代码。
 
 ---
 
@@ -100,6 +101,26 @@ description: >-
 反例（应删）：`/** FGUI 为 image，需手动 touchable */`、`// 注意：基类也会绑 vClose，此处保证 touchable`  
 正例（保留）：`/** 抽奖动画会话号 */`、`// 同 url 已播则跳过`
 
+### G. FGUI 屏幕适配（Win 类界面，顺带查，硬性）
+
+**只查 Win 类界面**（`XxxWin` 及其加载的主组件），**不查** Pop / Item / Li / Com。
+
+判定顺序（先定 `posType` 再谈改不改）：
+
+1. 在 `XxxWin.ts` 取 `showStrategy`（`WinShowStrategy.*`），查 `src/script/biz/fn/data/WinShowStrategy.ts` 得到 `UiWinPosType`。
+2. 打开 `fgui/assets/<pkg>/<组件>.xml`，找**顶层** `<group ... advanced="true">`（无 `group="..."` 属性），看其 `<relation>` 是否为 `target=""` 且 `sidePair` 含 `center-center` 与 `middle-middle`。
+
+| `UiWinPosType` | 对应策略 | 是否必须改 |
+|----------------|----------|-----------|
+| `FULL_SCREEN` / `SAFE_SCREEN` / `SAFE_SIZE` | `WIN`、`WIN_SIMPLE`、`DOCK`、`DOCK_LOWER/UPPER`、`LOWER_POP`、`POP_SIMPLE`、`MSG`、`LOADING` | **必须改**：缺最外层高级组或缺少 `center-center,middle-middle` → 列进「必须改」 |
+| `CENTER` / `NONE` | `WIN_POP`、`POP`、`DOCK_TIP` | **不必改**：框架 `UiWinShowStrategy.layoutWin` 已整体居中（`setXY((layer.width-win.width)/2, …)`），内部按设计尺寸定位；再加容器居中会与框架居中叠加/冲突 |
+
+- [ ] 范围内每个 Win 组件按上表过一遍
+- [ ] **报告必须带「必须改 / 不必改」标签与一句原因**，禁止把 `WIN_POP`/`POP` 类界面当缺陷报
+- [ ] 不必改项只写进「已通过」一句，不进「必须改」
+
+依据（`UiWinShowStrategy.layoutWin` CENTER 分支）：`src/script/core/ui/UiWinShowStrategy.ts` 约 207–211 行 `win.ensureSizeCorrect(); win.setXY((layer.width - win.width) / 2, (layer.height - win.height) / 2);`
+
 ---
 
 ## 报告格式
@@ -108,7 +129,7 @@ description: >-
 ## 代码检查：<范围>
 
 ### 结论
-<一句话：有/无必须改项；性能与复用各几条；是否清理了提示注释>
+<一句话：有/无必须改项；性能与复用各几条；是否清理了提示注释；FGUI 适配几处必须改、几处按 CENTER/NONE 不必改>
 
 ### 必须改
 - `path:行号附近` — 问题 — 建议
@@ -121,6 +142,10 @@ description: >-
 
 ### 对话提示型注释（可选）
 - `path` — 原注释大意 — 建议删除或已按要求删除
+
+### FGUI 屏幕适配（顺带，见清单 G）
+- `fgui/assets/<pkg>/<组件>.xml`（`<策略名>` → `UiWinPosType.<X>`）— **必须改**：缺最外层高级组容器居中，需加 `<relation target="" sidePair="center-center,middle-middle"/>`
+- `fgui/assets/<pkg>/<组件>.xml`（`WIN_POP` → `CENTER`）— **不必改**：框架整体居中，内部按设计尺寸定位
 
 ### 已通过（可选，极短）
 - …

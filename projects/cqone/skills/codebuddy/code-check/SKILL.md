@@ -3,16 +3,19 @@ name: code-check
 description: >-
   Checks cqone TypeScript for runtime/algorithm performance and whether
   existing common utilities are reused instead of reinvented; identifies
-  dialogue-tip comments (坑/注意/需手动…) in the checked scope. Use when the
-  user says 检查代码, 性能检查, 代码性能, 算法性能, 有没有用通用方法, 复用检查,
+  dialogue-tip comments (坑/注意/需手动…) in the checked scope; and, as a
+  by-check, whether Win-class FGUI screens have the outermost advanced group
+  with container center-center/middle-middle adaptation (skipped for
+  CENTER/NONE posType like WIN_POP/POP). Use when the user says 检查代码, 性能检查,
+  代码性能, 算法性能, 有没有用通用方法, 复用检查, 屏幕适配, 居中适配, 高级组,
   or asks to audit hot paths / Dic vs LinkedDic / ArrayUtil reuse on a module
   or diff. Complements code-standards (naming/comments) and does not replace
   Bugbot/security review.
 ---
 
-# cqone 代码检查（性能 + 通用方法 + 清对话提示注释）
+# cqone 代码检查（性能 + 通用方法 + 清对话提示注释 + FGUI 适配顺带查）
 
-**范围**：运行时性能、算法复杂度、是否复用项目已有通用能力；并清理「对话提示型」注释。  
+**范围**：运行时性能、算法复杂度、是否复用项目已有通用能力；清理「对话提示型」注释；**顺带**检查 Win 类界面的 FGUI 屏幕适配（清单 G）。  
 **不做**：命名/常规注释补全/排版（→ [code-standards](../code-standards/SKILL.md)）；安全专项（→ review-security）；通用缺陷扫雷可另用 Bugbot/OCR。
 
 **默认检查对象**：用户指定的模块/文件；未指定则查当前打开文件或本次会话改动的 diff。
@@ -26,7 +29,8 @@ description: >-
 3. 按下方清单逐项检查；对「重复调用 / 缺防护 / 未复用」类结论，**必须跟到 callee 实现**再定论（见「跟链防误报」）。
 4. 只报**可行动**问题（有位置 + 原因 + 建议）。
 5. 标记对话提示型注释（见清单 F）；仅在用户明确要求一并修改时才删除，并在报告中说明。
-6. 输出固定报告格式；默认只报告，不改代码。
+6. **顺带跑清单 G（FGUI 屏幕适配）**：范围内出现 Win 类界面（含新增/改动的 `XxxWin.ts` 及其 FGUI 组件）时必须查，并在报告里显式标注「必须改 / 不必改 + 原因」。
+7. 输出固定报告格式（代码定位一律用「起止行引用块」，禁用内联 `path:line`）；默认只报告，不改代码。
 
 ---
 
@@ -100,31 +104,93 @@ description: >-
 反例（应删）：`/** FGUI 为 image，需手动 touchable */`、`// 注意：基类也会绑 vClose，此处保证 touchable`  
 正例（保留）：`/** 抽奖动画会话号 */`、`// 同 url 已播则跳过`
 
+### G. FGUI 屏幕适配（Win 类界面，顺带查，硬性）
+
+**只查 Win 类界面**（`XxxWin` 及其加载的主组件），**不查** Pop / Item / Li / Com。
+
+判定顺序（先定 `posType` 再谈改不改）：
+
+1. 在 `XxxWin.ts` 取 `showStrategy`（`WinShowStrategy.*`），查 `src/script/biz/fn/data/WinShowStrategy.ts` 得到 `UiWinPosType`。
+2. 打开 `fgui/assets/<pkg>/<组件>.xml`，找**顶层** `<group ... advanced="true">`（无 `group="..."` 属性），看其 `<relation>` 是否为 `target=""` 且 `sidePair` 含 `center-center` 与 `middle-middle`。
+
+| `UiWinPosType` | 对应策略 | 是否必须改 |
+|----------------|----------|-----------|
+| `FULL_SCREEN` / `SAFE_SCREEN` / `SAFE_SIZE` | `WIN`、`WIN_SIMPLE`、`DOCK`、`DOCK_LOWER/UPPER`、`LOWER_POP`、`POP_SIMPLE`、`MSG`、`LOADING` | **必须改**：缺最外层高级组或缺少 `center-center,middle-middle` → 列进「必须改」 |
+| `CENTER` / `NONE` | `WIN_POP`、`POP`、`DOCK_TIP` | **不必改**：框架 `UiWinShowStrategy.layoutWin` 已整体居中（`setXY((layer.width-win.width)/2, …)`），内部按设计尺寸定位；再加容器居中会与框架居中叠加/冲突 |
+
+- [ ] 范围内每个 Win 组件按上表过一遍
+- [ ] **报告必须带「必须改 / 不必改」标签与一句原因**，禁止把 `WIN_POP`/`POP` 类界面当缺陷报
+- [ ] 不必改项只写进「已通过」一句，不进「必须改」
+
+依据（`UiWinShowStrategy.layoutWin`）：
+
+```207:211:src/script/core/ui/UiWinShowStrategy.ts
+        case UiWinPosType.CENTER:
+            win.ensureSizeCorrect();
+            win.setXY((this.layer.width - win.width) / 2, (this.layer.height - win.height) / 2);
+```
+
 ---
 
 ## 报告格式
 
-```markdown
+### 代码定位：只用引用块（硬性）
+
+报告里每一处代码位置，**只能**用「起止行引用块」给出，示例：
+
+```154:159:src/script/acts/summerTreasure/view/ActSummerTreasureWin.ts
+        this.updateItems();
+        this.updateGoals();
+        this.refreshRecord();
+```
+
+规则：
+
+- 头部为 `起行:止行:相对工程根的路径`（如 `src/script/...`），块内贴该区间代码，**1～6 行够用即可**。
+- **禁止**内联 `path:行号`、`path:154~161`、`path:line:col` 等一切行内写法——IDE 渲染器不识别，点了不会跳转；遇到历史报告里的行内写法，重发时必须改写。
+- 同一文件的相邻位置合并成一个引用块；次要信息可只提文件名、不给块，但不得退化成内联路径。
+
+### 各小节写法
+
+````markdown
 ## 代码检查：<范围>
 
 ### 结论
-<一句话：有/无必须改项；性能与复用各几条；是否清理了提示注释>
+<一句话：有/无必须改项；性能与复用各几条；是否清理了提示注释；FGUI 适配有几处必须改、几处按 CENTER/NONE 不必改>
 
 ### 必须改
-- `path:行号附近` — 问题 — 建议
+- 问题一句话（`类#方法`）
+```154:157:src/…/ActSummerTreasureWin.ts
+<code>
+```
+  建议一句话
 
 ### 建议改
-- `path:行号附近` — 问题 — 建议
+- 问题一句话（`类#方法`）
+```36:39:src/…/ActSummerTreasureGoalGroupMo.ts
+<code>
+```
+  建议一句话
 
 ### 复用机会
-- `path` — 手写了 X — 应用 `Y.zzz`（参考 `path/to/example`）
+- 手写了 X → 应用 `Y.zzz`
+```105:111:src/…/ActSummerTreasureGroupMo.ts
+<code>
+```
 
 ### 对话提示型注释（可选）
-- `path` — 原注释大意 — 建议删除或已按要求删除
+- 原注释大意 — 建议删除或已按要求删除
+```25:25:src/…/ActSummerTreasureRankPop.ts
+<code>
+```
+
+### FGUI 屏幕适配（顺带，见清单 G）
+- `<pkg>/<组件>`（`<策略名>` → `UiWinPosType.<X>`）— **必须改**：缺最外层高级组容器居中，需加 `<relation target="" sidePair="center-center,middle-middle"/>`
+- `<pkg>/<组件>`（`WIN_POP` → `CENTER`）— **不必改**：框架整体居中，内部按设计尺寸定位
 
 ### 已通过（可选，极短）
-- …
-```
+- …（底层已幂等的项在这里一句带过；提到具体位置时同样用引用块）
+````
 
 无问题写「未发现必须改项」，可列 1～2 条观察，勿凑数。
 

@@ -72,6 +72,7 @@ Agent 常用摘要与增量约定：[reference.md](reference.md)
 - [ ] 视图刷新方法：refresh 开头
 - [ ] FGUI 子节点：`v` + 语义 + 类型后缀（`vXxxTxt`/`vXxxBtn`/`vXxxMv`…）；抬 Win 禁泛名 `vRedDot`（见 [fgui-ui-naming](../fgui-ui-naming/SKILL.md)）
 - [ ] **列表默认复用**：可滚动 `GList` 在 `initUi` 里 `setVirtual()`（循环用 `setVirtualAndLoop`）；不可滚动、或必须按 `numChildren` 遍历全部项时才例外（见 reference「复用列表」）
+- [ ] **Win 屏幕适配**：新增/改动 Win 界面时，按 `showStrategy` 的 `UiWinPosType` 判断——`FULL_SCREEN`/`SAFE_SCREEN`/`SAFE_SIZE`（`WIN`、`WIN_SIMPLE`、`DOCK*`、`LOWER_POP`、`POP_SIMPLE`、`MSG`、`LOADING`）必须有最外层高级组 + `<relation target="" sidePair="center-center,middle-middle"/>`；`CENTER`/`NONE`（`WIN_POP`、`POP`、`DOCK_TIP`）由框架整体居中，**不需要**做，也不得补（详见 [code-check](../code-check/SKILL.md) 清单 G）
 - [ ] 界面生命周期顺序与监听清理符合规范（listenMgr 自动 off）
 - [ ] 覆盖父类方法时签名与父类一致（含可选参数）
 - [ ] 无重复 import、无 Po 当 Mo 用、非必要不用 any

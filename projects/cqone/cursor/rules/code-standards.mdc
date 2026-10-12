@@ -20,6 +20,7 @@ Agent Skill：`projects/cqone/skills/cursor/code-standards/SKILL.md`（含 cqone
 - 布尔：`get isXxx()`，勿 `isXxx()` 当属性漏括号
 - 覆盖父类方法保持签名一致（含可选参数）
 - FGUI：`v` 前缀；`setCustomClass` 与 xml 组件名一致
+- Win 屏幕适配：`WIN`/`WIN_SIMPLE`/`DOCK*`/`LOWER_POP`/`POP_SIMPLE`/`MSG`/`LOADING`（`UiWinPosType` 为 `FULL_SCREEN`/`SAFE_SCREEN`/`SAFE_SIZE`）必须有最外层高级组 + `<relation target="" sidePair="center-center,middle-middle"/>`；`WIN_POP`/`POP`/`DOCK_TIP`（`CENTER`/`NONE`）由框架整体居中，**不做**也不要补
 - Data 收包 `onSC*`、发包 `req*`；视图 `refresh*`
 - 功能商店 `Shop.csv`；活动商店 `ActivityShop.csv`
 - IDEA 格式化 scheme **tuoqi**（`Ctrl+Alt+L`）
