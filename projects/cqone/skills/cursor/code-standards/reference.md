@@ -445,6 +445,9 @@ CQ 模板路径（用户本机）：
 
 ```
 src/script/
+  core/                → 引擎/框架级；禁止游戏领域知识（fnId 等）
+  biz/common/data/     → 业务数据通用工具（CommonDataUtil）
+  biz/common/view/     → 业务视图通用工具（CommonViewUtil）
   biz/{module}/data/   → XxxData, XxxMo, XxxEvent, XxxConst
   biz/{module}/view/   → XxxWin, XxxPop, XxxItem
   conf/view/Fns.ts     → FnMo.reg 功能页
@@ -456,6 +459,8 @@ fgui/assets/{Pkg}/     → FGUI 组件 xml
 tool/csv/              → 策划表
 tool/protofile/        → proto 源
 ```
+
+`core` 与具体游戏无关。跨模块通用方法：数据层放 `biz/common/data`，视图层放 `biz/common/view`。禁止往 `UiUtil` 塞 `fnId` 等业务语义（反例：`selectControllerByFnId` 已迁 `CommonViewUtil`）。
 
 ---
 
@@ -537,3 +542,4 @@ constructor() {
 | Data 用 `Timer.frameOnce` 刷红点 | 改 `RedDotTask` / `update*RedDotsLater` |
 | `init()` 里立刻 `updateRedDotsLater`（依赖 SC/背包） | 挪到 `onSC…` / 数据变更回调 |
 | 兄弟页签 Fn 互相 `addChild`（如主玩法挂累抽 GOAL） | 各自 `createChildOfFn(自己的Fn)`；入口靠 Function/`ENTRY`；改 Fn 后重审 `RedDots` |
+| `UiUtil.selectControllerByFnId`（core 带 `fnId`） | 迁到 `CommonViewUtil`；`core` 禁止游戏领域知识 |

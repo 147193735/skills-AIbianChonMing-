@@ -78,6 +78,7 @@ Agent 常用摘要与增量约定：[reference.md](reference.md)
 - [ ] 无重复 import、无 Po 当 Mo 用、非必要不用 any
 - [ ] 改动范围最小，风格与相邻文件一致
 - [ ] **不改无关排版**：不挪动既有方法/成员上下位置、不重排无关 import、不做“顺手整理”；diff 只应含业务相关行
+- [ ] **core 禁止游戏领域知识**：`src/script/core` 与具体游戏无关；数据通用放 `biz/common/data`，视图通用放 `biz/common/view`；禁止往 `UiUtil` 塞 `fnId` 等业务语义
 - [ ] Data 变更默认 `eventChangeLater()` + 视图听 `EventType.change`；简单功能不新建 `XxxEvent`
 - [ ] 勾选/选中提醒对齐 `ActShopData`，勿自造 `NOTIFY_*` 带参事件
 - [ ] **红点必须走 `RedDotTask`**：Data 层禁止用 `Timer.frameOnce`/`Timer.once` 刷红点；**`init` 勿立刻刷依赖后端数据的红点**（等 `onSC…`/背包等就绪）；`eventChangeLater` 与 `redDotTask.runLater` 分离；避免 getter 热路径全量 `some(isBuyRedDot)`
@@ -306,6 +307,7 @@ FGUI：`super(pkg, resName)` + `setCustomClass("GoodsXxxItem", XxxItem)` 与 xml
 - 非必要不点 `any` 属性
 - 不写废话注释；方法注释精简见「注释规范」；体内只解释非显而易见原因
 - **禁止随意改他人代码排版**：修改已有文件时，保持原有方法/成员声明顺序与空白风格；不要为“更符合自己习惯”而上下挪动 `setWinMo`/`initUi` 等方法位置，也不要顺手重排无关 import。此类改动会污染 diff、阻碍 code review 与阅读对比。仅业务必需的增删改应出现在变更中
+- **core 禁止游戏领域知识**：`src/script/core` 与具体游戏无关，禁止 `fnId`/`FnId`/`implFnId` 等业务概念。通用工具：数据层 `biz/common/data`（`CommonDataUtil`），视图层 `biz/common/view`（`CommonViewUtil`）。禁止往 `UiUtil` 塞游戏语义。反例：`UiUtil.selectControllerByFnId`（已迁 `CommonViewUtil`）
 
 ### 职责边界（自己的事自己做）
 

@@ -67,7 +67,7 @@ codegraph 不可用（无索引/error）时再 Read；报告里对跟过链的�
 | `Timer` | 延迟/帧定时（非红点） |
 | `Listen` / `ListenMgr` | 事件监听生命周期 |
 | `ObjectPool` / `UniqueList` | 池与去重列表 |
-| `UiUtil` | `setVFields`、UI 辅助 |
+| `UiUtil` | `setVFields`、无游戏语义的 UI 辅助；**禁止** `fnId` 等业务概念 |
 | `JsonUtil` / `FileUtil` / `HttpUtil` | IO |
 | `ClassUtil` / `ReflectUtil` / `TypeUtil` | 类型与反射 |
 
@@ -75,6 +75,8 @@ codegraph 不可用（无索引/error）时再 Read；报告里对跟过链的�
 
 | 工具 | 典型用途 |
 |------|----------|
+| `CommonDataUtil` | 业务数据通用（`biz/common/data`） |
+| `CommonViewUtil` | 业务视图通用（`biz/common/view`）；含按 `fnId` 选控制器 |
 | `ActDataUtil` | 活动 Co 按 `activityGroup` 等 |
 | `CountdownUtil` | 倒计时展示 |
 | `RedDotTask` / `RedDotTaskList` | Data 红点 |

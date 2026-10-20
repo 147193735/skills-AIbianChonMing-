@@ -15,6 +15,7 @@ cqone 清单：同目录 `SKILL.md` / `reference.md`
 - 域词统一；布尔用 `get isXxx()`；父类方法签名一致
 - FGUI `v` 前缀；`setCustomClass` 与 xml 同名；**勿重复注册 BasicViews 已有公共组件**（`Btn_a_r`/`Btn_a_y`/`CostCom`/`RelateFnBtn` 等）
 - Win 屏幕适配：`WIN`/`WIN_SIMPLE`/`DOCK*`/`LOWER_POP`/`POP_SIMPLE`/`MSG`/`LOADING`（`FULL_SCREEN`/`SAFE_SCREEN`/`SAFE_SIZE`）需最外层高级组 + 容器 `center-center,middle-middle`；`WIN_POP`/`POP`/`DOCK_TIP`（`CENTER`/`NONE`）由框架居中，不做也不补
+- **core 禁止游戏领域知识**：`fnId` 等不进 `UiUtil`/`src/script/core`；数据通用 → `biz/common/data`，视图通用 → `biz/common/view`
 - `Shop.csv` vs `ActivityShop.csv` 勿混用
 
 ## 1. 命名规范
@@ -91,6 +92,7 @@ cqone 清单：同目录 `SKILL.md` / `reference.md`
 ### 杂项
 
 - **自己的事自己做**：缓动/特效由持有者在生命周期内自清；秒刷倒计时由持有 UI 的 Com/Item 自听 `SECONDS_CHANGE`；Win 只编排，不代子组件 `Tween.clearAll` 或代刷倒计时
+- **core 禁止游戏领域知识**：`src/script/core` 与具体游戏无关；通用工具数据层 `biz/common/data`，视图层 `biz/common/view`
 - 禁止将 `Po` 直接用作信息对象
 - 避免在 `any` 类型上点属性/方法
 - 优先组合而非类继承

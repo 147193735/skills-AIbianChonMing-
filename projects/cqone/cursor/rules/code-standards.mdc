@@ -23,6 +23,7 @@ Agent Skill：`projects/cqone/skills/cursor/code-standards/SKILL.md`（含 cqone
 - Win 屏幕适配：`WIN`/`WIN_SIMPLE`/`DOCK*`/`LOWER_POP`/`POP_SIMPLE`/`MSG`/`LOADING`（`UiWinPosType` 为 `FULL_SCREEN`/`SAFE_SCREEN`/`SAFE_SIZE`）必须有最外层高级组 + `<relation target="" sidePair="center-center,middle-middle"/>`；`WIN_POP`/`POP`/`DOCK_TIP`（`CENTER`/`NONE`）由框架整体居中，**不做**也不要补
 - Data 收包 `onSC*`、发包 `req*`；视图 `refresh*`
 - 功能商店 `Shop.csv`；活动商店 `ActivityShop.csv`
+- **core 禁止游戏领域知识**：`fnId` 等不进 `UiUtil`/`src/script/core`；数据通用 → `biz/common/data`，视图通用 → `biz/common/view`
 - IDEA 格式化 scheme **tuoqi**（`Ctrl+Alt+L`）
 
 ## 1. 命名规范
@@ -94,6 +95,7 @@ Agent Skill：`projects/cqone/skills/cursor/code-standards/SKILL.md`（含 cqone
 
 ### 杂项
 
+- **core 禁止游戏领域知识**：`src/script/core` 与具体游戏无关；通用工具数据层 `biz/common/data`，视图层 `biz/common/view`
 - 禁止将 `Po` 直接用作信息对象
 - 避免在 `any` 类型上点属性/方法
 - 优先组合而非类继承
