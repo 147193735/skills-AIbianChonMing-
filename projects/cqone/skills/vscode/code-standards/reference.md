@@ -5,6 +5,19 @@
 
 ---
 
+## 项目禁止修改范围（硬性）
+
+以下路径相对于 **cqone 项目根目录**，仅可读取；禁止新增、修改、删除、重命名、移动或格式化，也不得通过脚本、生成器、构建或发布工具间接改动：
+
+- `src/script/core/`（core）。
+- `bin/`：唯一例外是由现有工具生成的 `cfg.bin`、`bundle.js`；禁止手工编辑这两个产物，也不得扩大到其他文件。
+- `fgui/` 中除 `fgui/assets/` 以外的全部内容；`assets/` 仍须限于当前任务。
+- `laya/`、`libs/`、`mini-game/`、`tool/` 的全部内容。
+- 项目根目录下的文件（包括配置、工程文件及锁文件）。
+
+执行工具前先确认输出范围；工具会改到上述禁止范围时不得运行。交付前检查差异，确认没有越界。发现必须修改禁止范围才能完成需求时，先向用户说明具体路径和原因，等待用户明确调整该范围；普通的实现、修复或重构请求不视为解除限制。
+
+
 ## 命名原则
 
 - 全项目对同一事物用词统一（dungeon 不用 copy/fuben；rahi 不用 pet）
@@ -422,6 +435,9 @@ CQ 模板路径（用户本机）：
 
 ```
 src/script/
+  core/                → 引擎/框架级；禁止游戏领域知识（fnId 等）
+  biz/common/data/     → 业务数据通用工具（CommonDataUtil）
+  biz/common/view/     → 业务视图通用工具（CommonViewUtil）
   biz/{module}/data/   → XxxData, XxxMo, XxxEvent, XxxConst
   biz/{module}/view/   → XxxWin, XxxPop, XxxItem
   conf/view/Fns.ts     → FnMo.reg 功能页

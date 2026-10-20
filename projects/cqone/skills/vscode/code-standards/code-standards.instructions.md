@@ -30,6 +30,19 @@ Agent 常用摘要与增量约定：[reference.md](reference.md)
 
 ---
 
+## 项目禁止修改范围（硬性）
+
+以下路径相对于 **cqone 项目根目录**，仅可读取；禁止新增、修改、删除、重命名、移动或格式化，也不得通过脚本、生成器、构建或发布工具间接改动：
+
+- `src/script/core/`（core）。
+- `bin/`：唯一例外是由现有工具生成的 `cfg.bin`、`bundle.js`；禁止手工编辑这两个产物，也不得扩大到其他文件。
+- `fgui/` 中除 `fgui/assets/` 以外的全部内容；`assets/` 仍须限于当前任务。
+- `laya/`、`libs/`、`mini-game/`、`tool/` 的全部内容。
+- 项目根目录下的文件（包括配置、工程文件及锁文件）。
+
+执行工具前先确认输出范围；工具会改到上述禁止范围时不得运行。交付前检查差异，确认没有越界。发现必须修改禁止范围才能完成需求时，先向用户说明具体路径和原因，等待用户明确调整该范围；普通的实现、修复或重构请求不视为解除限制。
+
+
 ## 交付前自检（必做）
 
 ```
@@ -48,6 +61,7 @@ Agent 常用摘要与增量约定：[reference.md](reference.md)
 - [ ] 覆盖父类方法时签名与父类一致（含可选参数）
 - [ ] 无重复 import、无 Po 当 Mo 用、非必要不用 any
 - [ ] 改动范围最小，风格与相邻文件一致
+- [ ] **core 禁止游戏领域知识**：`src/script/core` 与具体游戏无关；数据通用放 `biz/common/data`，视图通用放 `biz/common/view`；禁止往 `UiUtil` 塞 `fnId` 等业务语义
 - [ ] **不改无关排版**：不挪动既有方法/成员上下位置、不重排无关 import、不做“顺手整理”；diff 只应含业务相关行
 - [ ] Data 变更默认 `eventChangeLater()` + 视图听 `EventType.change`；简单功能不新建 `XxxEvent`
 - [ ] 勾选/选中提醒对齐 `ActShopData`，勿自造 `NOTIFY_*` 带参事件
@@ -279,6 +293,8 @@ FGUI：`super(pkg, resName)` + `setCustomClass("GoodsXxxItem", XxxItem)` 与 xml
 - **禁止随意改他人代码排版**：修改已有文件时，保持原有方法/成员声明顺序与空白风格；不要为“更符合自己习惯”而上下挪动 `setWinMo`/`initUi` 等方法位置，也不要顺手重排无关 import。此类改动会污染 diff、阻碍 code review 与阅读对比。仅业务必需的增删改应出现在变更中
 
 ### 职责边界（自己的事自己做）
+
+**core 禁止游戏领域知识**：`src/script/core` 与具体游戏无关，禁止 `fnId`/`FnId`/`implFnId` 等业务概念。通用工具：数据层 `biz/common/data`（`CommonDataUtil`），视图层 `biz/common/view`（`CommonViewUtil`）。禁止往 `UiUtil` 塞游戏语义。
 
 封装的实践口诀：类管好自己的状态与清理，外界只编排。
 
